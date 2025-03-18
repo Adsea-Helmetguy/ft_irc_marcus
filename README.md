@@ -1,2 +1,73 @@
 # ft_irc
 42 ft_irc project
+
+
+## Phase 1: Understanding the Project Scope
+**Read and Understand the IRC Protocol**
+
+**Research how IRC works (server-client communication, commands, responses).**
+- [ ] Study [RFC 1459] (https://www.rfc-editor.org/rfc/rfc1459.html) (IRC protocol specification).
+- [ ] Choose a reference IRC client (e.g., WeeChat, HexChat).
+- [ ] Review the Project Requirements
+
+**Identify the mandatory features.**
+- [ ] Understand constraints (C++98, no external libraries, non-blocking I/O).
+- [ ] Understand the allowed system calls (socket, poll, etc.).
+
+## Phase 2: Setting Up the Project
+**Initialize the Project**
+
+- [x] Create a Makefile with the required rules (all, clean, fclean, re).
+- [x] Set up the basic project structure
+- [ ] Implement basic TCP server using socket, bind, listen, accept.
+- [ ] Make the server accept client connections on a given port
+
+## Phase 3: Core Server Implementation
+**Implement Non-Blocking I/O**
+
+- [ ] Use poll() (or select(), epoll(), kqueue()) to handle multiple clients.
+- [ ] Make sure the server doesn't hang on read/write operations.
+
+**Handle Client Connections**
+- [ ] Store connected clients in a list.
+- [ ] Implement authentication using a password.
+- [ ] Implement Basic IRC Commands
+
+1. NICK: Set the client's nickname.
+2. USER: Register the username.
+3. JOIN: Join a channel.
+4. PRIVMSG: Send private messages.
+5. PART: Leave a channel.
+6. Handle Channel Management
+
+- [ ] Store channels and their members.
+- [ ] Implement message broadcasting within a channel.
+- [ ] Implement Operator Privileges
+
+1. KICK: Remove a user from a channel.
+2. INVITE: Invite a user to a private channel.
+3. TOPIC: Set the channel topic.
+4. MODE: Manage channel modes (invite-only, password, operator, user limit).
+
+### Handle Disconnections and Errors
+
+- [ ] Ensure clients can disconnect properly.
+- [ ] Handle partial messages and packet reassembly.
+- [ ] Detect and manage invalid commands.
+
+## Phase 4: Testing and Debugging
+**Test with an IRC Client**
+
+- [ ] Connect using a real IRC client (WeeChat, HexChat).
+- [ ] Verify commands work as expected.
+
+**Edge Case Testing**
+
+- [ ] Handle clients sending incomplete/invalid data.
+- [ ] Test multiple clients joining and messaging in a channel.
+- [ ] Ensure graceful handling of disconnects.
+
+**Resource Management**
+
+- [ ] Check for memory leaks.
+- [ ] Ensure proper cleanup of resources.
