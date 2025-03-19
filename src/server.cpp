@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/03/19 10:26:40 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/03/19 18:43:17 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,9 @@ void Server::runServer()
 
 		std::cout << "Client connected from: " << inet_ntoa(clientAddr.sin_addr) << ":"
 			<< ntohs(clientAddr.sin_port) << std::endl;
+
+		const char *welcomeMsg = "Welcome to the IRC server!\n";
+		send(client_fd, welcomeMsg, strlen(welcomeMsg), 0);
 
 		close(client_fd);
 		std::cout << "Client disconnected." << std::endl;
