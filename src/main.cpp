@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:38 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/03/18 15:53:12 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/03/19 10:28:19 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,9 @@ int main(int ac, char **av)
 {
 	if (ac == 3)
 	{
-		if (!isValidPort(av[1]))
-		{
-			std::cerr << "Error: Invalid port number. Must be between 1024 and 65535." << std::endl;
-			return (1);
-		}
-		long portNum = std::strtol(av[1], NULL, 10);
-		Server server(portNum, av[2]);
+		Server server(av[1], av[2]);
+		// main loop will wait for connections
+		server.runServer();
 	}
 	else
 		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
