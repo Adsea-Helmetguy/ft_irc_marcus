@@ -1,13 +1,14 @@
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -I include -MMD -MP
 
-TARGET = a.out
+TARGET = ircserv
 
 # Define source and object directories
 SRC_DIR = src
 OBJ_DIR = obj
 
-SRCS = main.cpp
+SRCS = main.cpp \
+		server.cpp
 
 # Add "src/" prefix for compilation
 SRCS_PATH = $(addprefix $(SRC_DIR)/, $(SRCS))
@@ -28,7 +29,7 @@ $(TARGET): $(OBJS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
-	
+
 # Include dependency files if they exist
 -include $(DEPS)
 
