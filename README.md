@@ -1,6 +1,4 @@
 # ft_irc
-42 ft_irc project
-
 
 ## Phase 1: Understanding the Project Scope
 **Read and Understand the IRC Protocol**
