@@ -1,27 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/18 15:31:38 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/03/25 13:31:59 by gyong-si         ###   ########.fr       */
+/*   Created: 2025/03/25 13:03:35 by gyong-si          #+#    #+#             */
+/*   Updated: 2025/03/25 13:05:26 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/server.hpp"
+#include "../include/client.hpp"
 
-int main(int ac, char **av)
+const int &Client::getFd() const
 {
-	if (ac == 3)
-	{
-		Server server(av[1], av[2]);
-		// main loop will wait for connections
-		setupSignalHandler();
-		server.runServer();
-	}
-	else
-		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
-	return (0);
+	return (_fd);
+}
+
+void Client::set_fd(int &fd)
+{
+	this->_fd = fd;
+}
+
+void Client::set_ip(std::string ip_addr)
+{
+	this->_ip_addr = ip_addr;
 }
