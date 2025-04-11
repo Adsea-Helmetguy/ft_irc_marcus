@@ -1,5 +1,13 @@
 # ft_irc
 
+## Instructions to run program
+
+**Server**
+1. ./ircserv portNumber password
+
+**Client**
+1. irssi -c 127.0.0.1 -p portNumber
+
 ## Phase 1: Understanding the Project Scope
 **Read and Understand the IRC Protocol**
 
