@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 class Client
@@ -7,7 +8,7 @@ class Client
 		std::string _ip_addr;
 
 	public:
-		Client() {};
+		Client(int client_fd, std::string &client_ip);
 		~Client() {};
 		const int &getFd() const;
 		void set_fd(int &fd);
