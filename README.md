@@ -3,7 +3,7 @@
 ## Instructions to run program
 
 **Server**
-1. ./ircserv portNumber password
+1. ./ircserv port password
 
 **Client**
 1. irssi
@@ -37,7 +37,7 @@
 
 **Handle Client Connections**
 - [x] Store connected clients in a list.
-- [ ] Implement authentication using a password.
+- [x] Implement authentication using a password.
 - [ ] Implement Basic IRC Commands
 
 1. NICK: Set the client's nickname.

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/16 14:01:30 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/16 15:25:26 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,64 @@ void	Server::handleIncomingNewClient()
 	}
 }
 
+void	Server::handleClientCommands(int fd, std::string &message, Client *client)
+{
+	std::istringstream	iss(message);
+	std::string			line;
+
+	while (std::getline(iss, line))
+	{
+		std::istringstream linestream(line);
+		std::string cmd;
+		linestream >> cmd;
+
+		if (cmd == "PASS")
+		{
+			std::string pass;
+			linestream >> pass;
+			if (pass == _password)
+			{
+				client->authenticate();
+				send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
+				std::cout << "Client " << fd << " : has been authenticated.\n";
+			}
+			else
+			{
+				send(fd, "ERROR :Invalid password\r\n", 26, 0);
+				removeClient(fd);
+				return ;
+			}
+		}
+		else if (cmd == "NICK" || cmd == "USER")
+		{
+			// check if client has been authenticated
+			if (!client->is_authenticated())
+			{
+				send(fd, "ERROR :You must authenticate with PASS first\r\n", 46, 0);
+				std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
+				continue;
+			}
+			if (cmd == "NICK")
+			{
+				std::string nick;
+				linestream >> nick;
+				client->set_nick(nick);
+				std::cout << "[NICK] " << nick << " has been saved." << std::endl;
+			}
+			else if (cmd == "USER")
+			{
+				std::string username, unused, hostname;
+				linestream >> username >> unused >> hostname;
+				client->set_username(username);
+				client->set_hostname(hostname);
+				std::cout << "[USER] " << username << ", " << hostname  << std::endl;
+			}
+		}
+		send(fd, "Welcome to the IRC Server\r\n", 29, 0);
+	}
+}
+
+
 void Server::handleClientConnection(int fd)
 {
 	char buffer[1024];
@@ -215,61 +273,7 @@ void Server::handleClientConnection(int fd)
 
 		std::cout << "Received from client " << fd << ": " << message << std::endl;
 		Client* client = getClientByFd(fd);
-
-		std::istringstream	iss(message);
-		std::string			line;
-
-		while (std::getline(iss, line))
-		{
-			std::istringstream linestream(line);
-			std::string cmd;
-			linestream >> cmd;
-
-			if (cmd == "PASS")
-			{
-				std::string pass;
-				linestream >> pass;
-				if (pass == _password)
-				{
-					client->authenticate();
-					send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
-					std::cout << "Client " << fd << " : has been authenticated.\n";
-				}
-				else
-				{
-					send(fd, "ERROR :Invalid password\r\n", 26, 0);
-					removeClient(fd);
-					return ;
-				}
-			}
-			else if (cmd == "NICK" || cmd == "USER")
-			{
-				// check if client has been authenticated
-				if (!client->is_authenticated())
-				{
-					send(fd, "ERROR :You must authenticate with PASS first\r\n", 46, 0);
-					std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
-					continue;
-				}
-				if (cmd == "NICK")
-				{
-					std::string nick;
-					linestream >> nick;
-					client->set_nick(nick);
-					std::cout << "[NICK] " << nick << " has been saved." << std::endl;
-				}
-				else if (cmd == "USER")
-				{
-					std::string username, unused, hostname;
-					linestream >> username >> unused >> hostname;
-					client->set_username(username);
-					client->set_hostname(hostname);
-					std::cout << "[USER] " << username << ", " << hostname  << std::endl;
-				}
-			}
-			send(fd, "Welcome to the IRC Server\r\n", 29, 0);
-
-		}
+		handleClientCommands(fd, message, client);
 	}
 }
 
