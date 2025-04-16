@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/11 12:14:37 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/16 14:01:30 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,49 +137,9 @@ void Server::runServer()
 		{
 			int fd = events[i].data.fd;
 			if (fd == _socket_fd)
-			{
-				struct sockaddr_in clientAddr;
-				socklen_t clientLen = sizeof(clientAddr);
-				int client_fd = accept(_socket_fd, (struct sockaddr *)&clientAddr, &clientLen);
-
-				if (client_fd == -1)
-				{
-					if (_signal)
-						break;
-					if (errno == EWOULDBLOCK || errno == EAGAIN)
-						continue;
-					std::cerr << "Error: Failed to accept client" << std::endl;
-					continue;
-				}
-
-				std::string client_ip = inet_ntoa(clientAddr.sin_addr);
-				std::cout << "Client connected from: " << client_ip << ":"
-					<< ntohs(clientAddr.sin_port) << std::endl;
-
-				// Create and store the new client
-				Client newClient(client_fd, client_ip);
-				addClient(newClient);
-			}
+				handleIncomingNewClient();
 			else
-			{
-				char buffer[1024];
-				ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
-
-				if (bytesRead <= 0)
-				{
-					std::cout << "Client " << fd << " disconnected.\n";
-					epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-					removeClient(fd);
-				}
-				else
-				{
-					buffer[bytesRead] = '\0';
-					std::cout << "Received from " << fd << ": " << buffer;
-
-					// Echo back
-					send(fd, buffer, bytesRead, 0);
-				}
-			}
+				handleClientConnection(fd);
 		}
 	}
 	closeClients();
@@ -196,48 +156,136 @@ void Server::signalHandler(int signum)
 	_signal = true;
 }
 
-void setupSignalHandler()
+void	Server::handleIncomingNewClient()
 {
-	signal(SIGINT, Server::signalHandler);
-	signal(SIGQUIT, Server::signalHandler);
-}
+	// creates the client fd
+	struct sockaddr_in clientAddr;
+	socklen_t clientLen = sizeof(clientAddr);
+	int client_fd = accept(_socket_fd, (struct sockaddr *)&clientAddr, &clientLen);
 
-bool isValidPort(const char *portStr)
-{
-	for (size_t i = 0; portStr[i]; i++)
-		if (!isdigit(portStr[i]))
-			return false;
+	if (client_fd == -1)
+	{
+		std::cerr << "Error: Failed to accept client" << std::endl;
+		return ;
+	}
 
-	long portNum = std::strtol(portStr, NULL, 10);
+	// get the client ip
+	std::string client_ip = inet_ntoa(clientAddr.sin_addr);
+	std::cout << "Client connected from: " << client_ip << ":"
+		<< ntohs(clientAddr.sin_port) << std::endl;
 
-	if (portNum < 1024 || portNum > 65535)
-		return false;
-	return true;
-}
+	// Create and store the new client
+	Client newClient(client_fd, client_ip);
 
-void	Server::addClient(const Client &client)
-{
-	int clientFd = client.getFd();
 	// this adds the client into the clients list
-	_clients.push_back(client);
+	_clients.push_back(newClient);
 
-	int flags = fcntl(clientFd, F_GETFL, 0);
-	fcntl(clientFd, F_SETFL, flags | O_NONBLOCK);
+	// set the client fd to non blocking
+	int flags = fcntl(client_fd, F_GETFL, 0);
+	fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
 
 	// this adds the client fd into epoll
 	struct epoll_event clientEvent;
 	clientEvent.events = EPOLLIN;
-	clientEvent.data.fd = clientFd;
-	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, clientFd, &clientEvent) == -1)
+	clientEvent.data.fd = client_fd;
+	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &clientEvent) == -1)
 	{
 		std::cerr << "Failed to add client to epoll: " << strerror(errno) << std::endl;
-		close(clientFd);
+		close(client_fd);
 		return ;
 	}
-	// send a welcome message to the client
-	const char *welcomeMsg = "Welcome to the IRC server!\n";
-	send(clientFd, welcomeMsg, strlen(welcomeMsg), 0);
 }
+
+void Server::handleClientConnection(int fd)
+{
+	char buffer[1024];
+	ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
+
+	// if the client quits, recv will receive 0 when closed or -1 when there is error
+	if (bytesRead <= 0)
+	{
+		std::cout << "Client " << fd << " disconnected.\n";
+		epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+		removeClient(fd);
+	}
+	else
+	{
+		buffer[bytesRead] = '\0';
+		std::string message(buffer);
+
+		std::cout << "Received from client " << fd << ": " << message << std::endl;
+		Client* client = getClientByFd(fd);
+
+		std::istringstream	iss(message);
+		std::string			line;
+
+		while (std::getline(iss, line))
+		{
+			std::istringstream linestream(line);
+			std::string cmd;
+			linestream >> cmd;
+
+			if (cmd == "PASS")
+			{
+				std::string pass;
+				linestream >> pass;
+				if (pass == _password)
+				{
+					client->authenticate();
+					send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
+					std::cout << "Client " << fd << " : has been authenticated.\n";
+				}
+				else
+				{
+					send(fd, "ERROR :Invalid password\r\n", 26, 0);
+					removeClient(fd);
+					return ;
+				}
+			}
+			else if (cmd == "NICK" || cmd == "USER")
+			{
+				// check if client has been authenticated
+				if (!client->is_authenticated())
+				{
+					send(fd, "ERROR :You must authenticate with PASS first\r\n", 46, 0);
+					std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
+					continue;
+				}
+				if (cmd == "NICK")
+				{
+					std::string nick;
+					linestream >> nick;
+					client->set_nick(nick);
+					std::cout << "[NICK] " << nick << " has been saved." << std::endl;
+				}
+				else if (cmd == "USER")
+				{
+					std::string username, unused, hostname;
+					linestream >> username >> unused >> hostname;
+					client->set_username(username);
+					client->set_hostname(hostname);
+					std::cout << "[USER] " << username << ", " << hostname  << std::endl;
+				}
+			}
+			send(fd, "Welcome to the IRC Server\r\n", 29, 0);
+
+		}
+	}
+}
+
+Client*	Server::getClientByFd(int fd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->getFd() == fd)
+		{
+			return &(*it);
+		}
+	}
+	return (NULL);
+};
+
+
 
 // remove the client from the client list
 void	Server::removeClient(int fd)
@@ -267,4 +315,23 @@ void	Server::closeClients()
 const std::vector<Client>& Server::getClients() const
 {
 	return (_clients);
+}
+
+void setupSignalHandler()
+{
+	signal(SIGINT, Server::signalHandler);
+	signal(SIGQUIT, Server::signalHandler);
+}
+
+bool isValidPort(const char *portStr)
+{
+	for (size_t i = 0; portStr[i]; i++)
+		if (!isdigit(portStr[i]))
+			return false;
+
+	long portNum = std::strtol(portStr, NULL, 10);
+
+	if (portNum < 1024 || portNum > 65535)
+		return false;
+	return true;
 }
