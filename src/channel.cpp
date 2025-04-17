@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/16 16:29:23 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/17 12:49:16 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,4 +41,22 @@ void Channel::removeMember(Client *client)
 		std::remove(_members.begin(), _members.end(), client),
 		_members.end()
 	);
+}
+
+void Channel::addOperator(Client *client)
+{
+	_operators.push_back(client);
+}
+
+void Channel::removeOperator(Client *client)
+{
+	_operators.erase(
+		std::remove(_operators.begin(), _operators.end(), client),
+		_operators.end()
+	);
+}
+
+bool Channel::isOperator(Client *client) const
+{
+	return (std::find(_operators.begin(), _operators.end(), client) != _operators.end());
 }

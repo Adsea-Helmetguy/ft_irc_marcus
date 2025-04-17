@@ -8,8 +8,9 @@
 class Channel
 {
 	private:
-		std::string 		_name;
-		std::vector<Client*> _members;
+		std::string 			_name;
+		std::vector<Client*>	_members;
+		std::vector<Client*>	_operators;
 
 	public:
 		Channel(const std::string &name);
@@ -21,6 +22,11 @@ class Channel
 		// setters
 		void setName(const std::string &name);
 
+		// add members
 		void addMember(Client *client);
 		void removeMember(Client *client);
+		// add operators
+		void addOperator(Client *client);
+		void removeOperator(Client *client);
+		bool isOperator(Client *client) const;
 };
