@@ -8,8 +8,9 @@ SRC_DIR = src
 OBJ_DIR = obj
 
 SRCS = main.cpp \
+		utils.cpp \
 		server.cpp \
-		client.cpp
+		client.cpp \
 
 # Add "src/" prefix for compilation
 SRCS_PATH = $(addprefix $(SRC_DIR)/, $(SRCS))

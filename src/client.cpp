@@ -6,18 +6,33 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/25 13:03:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/15 17:30:02 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/17 13:52:05 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/client.hpp"
 
-Client::Client(int client_fd, std::string &client_ip) : _fd(client_fd), _ip_addr(client_ip), _authenticated(false) {};
+Client::Client(int client_fd, std::string &client_ip) : _fd(client_fd), _ip_addr(client_ip), _authenticated(false), _registered(false) {};
 
 
 const int &Client::getFd() const
 {
 	return (_fd);
+}
+
+const std::string &Client::getNick() const
+{
+	return (_nick);
+}
+
+const std::string &Client::getUserName() const
+{
+	return (_username);
+}
+
+const std::string &Client::getHostName() const
+{
+	return (_hostname);
 }
 
 void Client::set_fd(int &fd)
@@ -51,8 +66,17 @@ void Client::authenticate()
 	_authenticated = true;
 }
 
+void Client::register_client()
+{
+	_registered = true;
+}
 
 bool Client::is_authenticated()
 {
 	return (_authenticated);
+}
+
+bool Client::is_registered()
+{
+	return (_registered);
 }

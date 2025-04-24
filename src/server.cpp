@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/16 15:25:26 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/24 22:51:57 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Server::Server(const std::string &port, const std::string &password)
 		std::cerr << "Error: Invalid port number. Must be between 1024 and 65535." << std::endl;
 		exit(1);
 	}
+	_name = "ircserv";
 	_port = std::strtol(port.c_str(), NULL, 10);
 	_password = password;
 
@@ -48,6 +49,11 @@ Server &Server::operator=(const Server &src)
 		_password = src._password;
 	}
 	return (*this);
+}
+
+const std::string &Server::getName() const
+{
+	return (_name);
 }
 
 void Server::serverInit()
@@ -196,61 +202,143 @@ void	Server::handleIncomingNewClient()
 	}
 }
 
-void	Server::handleClientCommands(int fd, std::string &message, Client *client)
+/** *
+void	Server::handleRegistrationCommand(const std::string &cmd, std::istringstream &linestream, int fd, Client *client)
 {
-	std::istringstream	iss(message);
-	std::string			line;
-
-	while (std::getline(iss, line))
+	if (!client->is_registered() && !client->getNick().empty() && !client->getUserName().empty()
+			&& !client->getHostName().empty())
 	{
-		std::istringstream linestream(line);
-		std::string cmd;
-		linestream >> cmd;
+		client->register_client();
+		std::string welcomeMsg = ":" + this->getName() + " 001 " + client->getNick() + " :Welcome to the IRC Server\r\n";
+		ssize_t bytesSent = send(fd, welcomeMsg.c_str(), welcomeMsg.size(), 0);
+		if (bytesSent == -1)
+			perror("send failed");
+		else
+			std::cout << "[DEBUG] Sent " << bytesSent << " bytes to FD " << fd << std::endl;
 
-		if (cmd == "PASS")
-		{
-			std::string pass;
-			linestream >> pass;
-			if (pass == _password)
-			{
-				client->authenticate();
-				send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
-				std::cout << "Client " << fd << " : has been authenticated.\n";
-			}
-			else
-			{
-				send(fd, "ERROR :Invalid password\r\n", 26, 0);
-				removeClient(fd);
-				return ;
-			}
-		}
-		else if (cmd == "NICK" || cmd == "USER")
-		{
-			// check if client has been authenticated
-			if (!client->is_authenticated())
-			{
-				send(fd, "ERROR :You must authenticate with PASS first\r\n", 46, 0);
-				std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
-				continue;
-			}
-			if (cmd == "NICK")
-			{
-				std::string nick;
-				linestream >> nick;
-				client->set_nick(nick);
-				std::cout << "[NICK] " << nick << " has been saved." << std::endl;
-			}
-			else if (cmd == "USER")
-			{
-				std::string username, unused, hostname;
-				linestream >> username >> unused >> hostname;
-				client->set_username(username);
-				client->set_hostname(hostname);
-				std::cout << "[USER] " << username << ", " << hostname  << std::endl;
-			}
-		}
-		send(fd, "Welcome to the IRC Server\r\n", 29, 0);
+		std::cout << "Client " << fd << " is now fully registered.\n";
 	}
+}
+**/
+
+void Server::handlePass(int fd, std::list<std::string> cmd_list)
+{
+	Client *client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_list.size() != 2)
+	{
+		// need to change this
+		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
+		return ;
+	}
+	// iterate to the second item in the list
+	std::list<std::string>::const_iterator it = cmd_list.begin();
+	++it;
+	const std::string &provided = *it;
+	if (provided == _password)
+	{
+		client->authenticate();
+		send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
+		std::cout << "Client " << fd << " : has been authenticated.\n";
+	}
+	else
+		send(fd, "ERROR :Invalid password\r\n", 26, 0);
+}
+
+void Server::handleNick(int fd, std::list<std::string> cmd_list)
+{
+	Client *client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_list.size() != 2)
+	{
+		// need to change this
+		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
+		return ;
+	}
+	// check if user has authenticated.
+	if (!client->is_authenticated())
+	{
+		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
+		sendError(fd, errorMsg);
+		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
+		return ;
+	}
+	// iterate to the second item in the list
+	// /NICK nickname
+	std::list<std::string>::const_iterator it = cmd_list.begin();
+	++it;
+	std::string second = *it;
+	client->set_nick(second);
+	std::cout << "[NICK] " << second << " has been saved." << std::endl;
+}
+
+void Server::handleUser(int fd, std::list<std::string> cmd_list)
+{
+	//std::cout << "entered handleUser";
+	Client *client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_list.size() != 5)
+	{
+		const std::string &errorMsg = "ERROR :USER command requires three argument\r\n";
+		sendError(fd, errorMsg);
+		return ;
+	}
+	// check if user has authenticated.
+	if (!client->is_authenticated())
+	{
+		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
+		sendError(fd, errorMsg);
+		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
+		return ;
+	}
+	// iterate to the second item in the list
+	// /USER username something hostname
+	std::list<std::string>::const_iterator it = cmd_list.begin();
+	++it;
+	std::string username = *it;
+	//std::cout << second << std::endl;
+	client->set_username(username);
+	++it;++it;
+	std::string hostname = *it;
+	//std::cout << fourth << std::endl;
+
+	client->set_hostname(hostname);
+	std::cout << "[USER] : " << username << ", " << "[USER] : "<< hostname  << std::endl;
+	// check if all is set, return a message
+	if (!client->getNick().empty() && !client->getUserName().empty()
+		&& !client->getHostName().empty() && !client->is_registered())
+	{
+		client->register_client();
+		std::string welcome = ":" + this->getName()
+			+ " 001 " + client->getNick()
+			+ " :Welcome to the IRC Server\r\n";
+		ssize_t sent = send(fd, welcome.c_str(), welcome.size(), 0);
+		if (sent == -1)
+			perror("send");
+		else
+			std::cout << "[DEBUG] send() returned " << sent << "\n";
+	}
+}
+
+
+
+void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
+{
+	const std::string &cmd = cmd_lst.front();
+	const std::string &errorMsg = "ERROR :Unknown command\r\n";
+	if (cmd == "PASS")
+		// authenticate the user
+		handlePass(fd, cmd_lst);
+	else if (cmd == "NICK")
+		// set the nickname
+		handleNick(fd, cmd_lst);
+	else if (cmd == "USER")
+		handleUser(fd, cmd_lst);
+	else
+		sendError(fd, errorMsg);
 }
 
 
@@ -269,11 +357,28 @@ void Server::handleClientConnection(int fd)
 	else
 	{
 		buffer[bytesRead] = '\0';
-		std::string message(buffer);
+		std::string command(buffer);
 
-		std::cout << "Received from client " << fd << ": " << message << std::endl;
-		Client* client = getClientByFd(fd);
-		handleClientCommands(fd, message, client);
+		std::cout << "Received from client " << fd << ": " << command << std::endl;
+		//Client* client = getClientByFd(fd);
+
+		//handleClientCommands(fd, message, client);
+		// break the command from the user into individual str
+		// the client can send multiple lines to the user
+		// run a loop and break each line to execute it.
+		std::istringstream	iss(command);
+		std::string			line;
+
+		while (std::getline(iss, line))
+		{
+			if (!line.empty() && line[line.size() - 1] == '\r')
+				line.erase(line.size() - 1, 1);
+			std::cout << line << std::endl;
+			std::list<std::string> cmd_lst = splitString(line);
+			// function to execute cmd
+			if (!cmd_lst.empty())
+				execute_cmd(fd, cmd_lst);
+		}
 	}
 }
 
@@ -319,23 +424,4 @@ void	Server::closeClients()
 const std::vector<Client>& Server::getClients() const
 {
 	return (_clients);
-}
-
-void setupSignalHandler()
-{
-	signal(SIGINT, Server::signalHandler);
-	signal(SIGQUIT, Server::signalHandler);
-}
-
-bool isValidPort(const char *portStr)
-{
-	for (size_t i = 0; portStr[i]; i++)
-		if (!isdigit(portStr[i]))
-			return false;
-
-	long portNum = std::strtol(portStr, NULL, 10);
-
-	if (portNum < 1024 || portNum > 65535)
-		return false;
-	return true;
 }
