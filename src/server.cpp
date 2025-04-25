@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/24 22:51:57 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/25 11:45:08 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,6 +323,60 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 	}
 }
 
+void Server::handleJoin(int fd, std::list<std::string> cmd_list)
+{
+	Client *client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_list.size() != 2)
+	{
+		// need to change this
+		send(fd, "ERROR :JOIN command requires exactly one argument\r\n", 50, 0);
+		return ;
+	}
+	// extract the channel name
+	std::list<std::string>::const_iterator it = cmd_list.begin();
+	++it;
+	const std::string &channelName = *it;
+
+	// iterate over _channels to search if the channel already exist
+	Channel *channel = NULL;
+	for (std::vector<Channel>::iterator ch = _channels.begin(); ch != _channels.end(); ++ch)
+	{
+		if (ch->getName() == channelName)
+		{
+			channel = &(*ch);
+			break ;
+		}
+	}
+	// if the channel does not exit, create the channel
+	if (!channel)
+	{
+		// create a new channel with the name given
+		Channel nc(channelName);
+		// add the client to the channel
+		nc.addMember(client);
+		// add the client as operator
+		nc.addOperator(client);
+		_channels.push_back(nc);
+		// send a message back to client
+		std::string reply = "JOIN " + channelName + "\r\n";
+		send(fd, reply.c_str(), reply.size(), 0);
+		std::cout << "[INFO] New channel " << channelName
+				  << " created by " << client->getNick() << "\n";
+	}
+	else
+	{
+		// this channel already exit, add the client as member
+		// need to check if client is already a member
+		if (!channel->isMember(client))
+		{
+			channel->addMember(client);
+			std::string reply = "JOIN " + channelName + "\r\n";
+			send(fd, reply.c_str(), reply.size(), 0);
+		}
+	}
+}
 
 
 void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
@@ -337,6 +391,8 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		handleNick(fd, cmd_lst);
 	else if (cmd == "USER")
 		handleUser(fd, cmd_lst);
+	else if (cmd == "JOIN")
+		handleJoin(fd, cmd_lst);
 	else
 		sendError(fd, errorMsg);
 }

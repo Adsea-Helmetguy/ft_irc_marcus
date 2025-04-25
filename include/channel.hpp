@@ -25,6 +25,7 @@ class Channel
 		// add members
 		void addMember(Client *client);
 		void removeMember(Client *client);
+		bool isMember(Client *client);
 		// add operators
 		void addOperator(Client *client);
 		void removeOperator(Client *client);

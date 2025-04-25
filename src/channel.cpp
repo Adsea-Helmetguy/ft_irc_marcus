@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/17 12:49:16 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/25 11:43:10 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,18 @@ void Channel::removeMember(Client *client)
 		std::remove(_members.begin(), _members.end(), client),
 		_members.end()
 	);
+}
+
+bool Channel::isMember(Client *client)
+{
+	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+	{
+		if (client->getUserName() == get the name from it)
+		{
+			return (true);
+		}
+	}
+	return (false);
 }
 
 void Channel::addOperator(Client *client)
