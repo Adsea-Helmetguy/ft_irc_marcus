@@ -1,5 +1,14 @@
 # ft_irc
 
+## Instructions to run program
+
+**Server**
+1. ./ircserv port password
+
+**Client**
+1. irssi
+2. /connect localhost port password
+
 ## Phase 1: Understanding the Project Scope
 **Read and Understand the IRC Protocol**
 
@@ -17,18 +26,18 @@
 
 - [x] Create a Makefile with the required rules (all, clean, fclean, re).
 - [x] Set up the basic project structure
-- [ ] Implement basic TCP server using socket, bind, listen, accept.
-- [ ] Make the server accept client connections on a given port
+- [x] Implement basic TCP server using socket, bind, listen, accept.
+- [x] Make the server accept client connections on a given port
 
 ## Phase 3: Core Server Implementation
 **Implement Non-Blocking I/O**
 
-- [ ] Use poll() (or select(), epoll(), kqueue()) to handle multiple clients.
+- [x] Use poll() (or select(), epoll(), kqueue()) to handle multiple clients.
 - [ ] Make sure the server doesn't hang on read/write operations.
 
 **Handle Client Connections**
-- [ ] Store connected clients in a list.
-- [ ] Implement authentication using a password.
+- [x] Store connected clients in a list.
+- [x] Implement authentication using a password.
 - [ ] Implement Basic IRC Commands
 
 1. NICK: Set the client's nickname.

@@ -1,27 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/18 15:31:38 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/03/25 13:31:59 by gyong-si         ###   ########.fr       */
+/*   Created: 2025/04/24 14:56:17 by gyong-si          #+#    #+#             */
+/*   Updated: 2025/04/24 21:30:19 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/server.hpp"
+#pragma once
+#include <iostream>
+#include <list>
+#include "server.hpp"
 
-int main(int ac, char **av)
-{
-	if (ac == 3)
-	{
-		Server server(av[1], av[2]);
-		// main loop will wait for connections
-		setupSignalHandler();
-		server.runServer();
-	}
-	else
-		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
-	return (0);
-}
+class Server;
+
+bool isValidPort(const char *portStr);
+void setupSignalHandler();
+std::list<std::string> splitString(std::string &cmd);
+void sendError(int fd, const std::string &message);
