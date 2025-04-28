@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/25 11:43:10 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/28 14:24:31 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,8 @@ bool Channel::isMember(Client *client)
 {
 	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
 	{
-		if (client->getUserName() == get the name from it)
-		{
+		if (*it == client)
 			return (true);
-		}
 	}
 	return (false);
 }

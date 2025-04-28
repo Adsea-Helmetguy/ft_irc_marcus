@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/25 11:45:08 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/28 15:16:10 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,25 +202,6 @@ void	Server::handleIncomingNewClient()
 	}
 }
 
-/** *
-void	Server::handleRegistrationCommand(const std::string &cmd, std::istringstream &linestream, int fd, Client *client)
-{
-	if (!client->is_registered() && !client->getNick().empty() && !client->getUserName().empty()
-			&& !client->getHostName().empty())
-	{
-		client->register_client();
-		std::string welcomeMsg = ":" + this->getName() + " 001 " + client->getNick() + " :Welcome to the IRC Server\r\n";
-		ssize_t bytesSent = send(fd, welcomeMsg.c_str(), welcomeMsg.size(), 0);
-		if (bytesSent == -1)
-			perror("send failed");
-		else
-			std::cout << "[DEBUG] Sent " << bytesSent << " bytes to FD " << fd << std::endl;
-
-		std::cout << "Client " << fd << " is now fully registered.\n";
-	}
-}
-**/
-
 void Server::handlePass(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -274,6 +255,36 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	std::cout << "[NICK] " << second << " has been saved." << std::endl;
 }
 
+void Server::sendWelcome(Client *client)
+{
+	std::string serverName = this->getName();
+	std::string nick = client->getNick();
+	int fd = client->getFd();
+
+	std::string msg001 = ":" + serverName + " 001 " + nick +
+		" :Welcome to the IRC server!\r\n";
+	std::string msg002 = ":" + serverName + " 002 " + nick +
+		" :Your host is " + serverName + ", running version 1.0\r\n";
+	std::string msg003 = ":" + serverName + " 003 " + nick +
+		" :This server was created today\r\n";
+	std::string msg004 = ":" + serverName + " 004 " + nick +
+		" " + serverName + " 1.0 o o\r\n";
+	std::string msg375 = ":" + serverName + " 375 " + nick +
+		" :- " + serverName + " This is ft-irc - \r\n";
+	std::string msg372 = ":" + serverName + " 372 " + nick +
+		" :- Welcome to the IRC server!\r\n";
+	std::string msg376 = ":" + serverName + " 376 " + nick +
+		" :End of /MOTD command.\r\n";
+
+	send(fd, msg001.c_str(), msg001.size(), 0);
+	send(fd, msg002.c_str(), msg002.size(), 0);
+	send(fd, msg003.c_str(), msg003.size(), 0);
+	send(fd, msg004.c_str(), msg004.size(), 0);
+	send(fd, msg375.c_str(), msg375.size(), 0);
+	send(fd, msg372.c_str(), msg372.size(), 0);
+	send(fd, msg376.c_str(), msg376.size(), 0);
+}
+
 void Server::handleUser(int fd, std::list<std::string> cmd_list)
 {
 	//std::cout << "entered handleUser";
@@ -312,14 +323,7 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 		&& !client->getHostName().empty() && !client->is_registered())
 	{
 		client->register_client();
-		std::string welcome = ":" + this->getName()
-			+ " 001 " + client->getNick()
-			+ " :Welcome to the IRC Server\r\n";
-		ssize_t sent = send(fd, welcome.c_str(), welcome.size(), 0);
-		if (sent == -1)
-			perror("send");
-		else
-			std::cout << "[DEBUG] send() returned " << sent << "\n";
+		sendWelcome(client);
 	}
 }
 
@@ -418,7 +422,6 @@ void Server::handleClientConnection(int fd)
 		std::cout << "Received from client " << fd << ": " << command << std::endl;
 		//Client* client = getClientByFd(fd);
 
-		//handleClientCommands(fd, message, client);
 		// break the command from the user into individual str
 		// the client can send multiple lines to the user
 		// run a loop and break each line to execute it.

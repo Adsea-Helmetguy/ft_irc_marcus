@@ -11,6 +11,7 @@ SRCS = main.cpp \
 		utils.cpp \
 		server.cpp \
 		client.cpp \
+		channel.cpp
 
 # Add "src/" prefix for compilation
 SRCS_PATH = $(addprefix $(SRC_DIR)/, $(SRCS))
