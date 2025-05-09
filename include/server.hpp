@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/25 11:21:18 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/04/28 15:10:25 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,8 @@ class Server
 		void		handleNick(int fd, std::list<std::string> cmd_list);
 		void		handleJoin(int fd, std::list<std::string> cmd_list);
 
-		//void		handleRegistrationCommand(const std::string &cmd, std::istringstream &linestream, int fd, Client *client);
+		void		sendWelcome(Client *client);
+
 		void		execute_cmd(int fd, std::list<std::string> cmd);
 		void		removeClient(int fd);
 		const 		std::vector<Client>& getClients() const;
