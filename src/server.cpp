@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/28 15:16:10 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/09 16:36:26 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,7 +404,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 
 void Server::handleClientConnection(int fd)
 {
-	char buffer[1024];
+	char buffer[512];
 	ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
 
 	// if the client quits, recv will receive 0 when closed or -1 when there is error
