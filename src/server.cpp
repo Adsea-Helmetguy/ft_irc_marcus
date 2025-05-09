@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/09 16:36:26 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/09 16:47:26 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -397,6 +397,10 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		handleUser(fd, cmd_lst);
 	else if (cmd == "JOIN")
 		handleJoin(fd, cmd_lst);
+	else if (cmd == "CAP")
+		;
+	else if (cmd == "MODE")
+		;
 	else
 		sendError(fd, errorMsg);
 }
