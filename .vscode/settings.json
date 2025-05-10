@@ -49,6 +49,7 @@
 		"typeinfo": "cpp",
 		"csignal": "cpp",
 		"sstream": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"ctime": "cpp"
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/09 16:47:26 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/10 11:10:21 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,7 @@ void Server::sendWelcome(Client *client)
 	std::string msg002 = ":" + serverName + " 002 " + nick +
 		" :Your host is " + serverName + ", running version 1.0\r\n";
 	std::string msg003 = ":" + serverName + " 003 " + nick +
-		" :This server was created today\r\n";
+		" :This server was created on " + getFormattedTime() + "\r\n";
 	std::string msg004 = ":" + serverName + " 004 " + nick +
 		" " + serverName + " 1.0 o o\r\n";
 	std::string msg375 = ":" + serverName + " 375 " + nick +
