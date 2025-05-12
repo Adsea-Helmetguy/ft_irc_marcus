@@ -2,20 +2,27 @@
 
 ## Instructions to run program
 
-**Server**
+**Server - IMPT MUST START THE SERVER BEFORE YOU CONNECT**
 1. ./ircserv port password
 
 **Client**
 1. irssi
 2. /connect localhost port password
 
+**Joining a Channel**
+1. /join <#channelname>
+
+**How to kill port if needed**
+1. sudo lsof -i :<PORT> (Get PID from this command)
+2. sudo kill -9 <PID>
+
 ## Phase 1: Understanding the Project Scope
 **Read and Understand the IRC Protocol**
 
 **Research how IRC works (server-client communication, commands, responses).**
 - [ ] Study [RFC 1459] (https://www.rfc-editor.org/rfc/rfc1459.html) (IRC protocol specification).
-- [ ] Choose a reference IRC client (e.g., WeeChat, HexChat).
-- [ ] Review the Project Requirements
+- [x] Choose a reference IRC client (e.g., WeeChat, HexChat).
+- [x] Review the Project Requirements
 
 **Identify the mandatory features.**
 - [ ] Understand constraints (C++98, no external libraries, non-blocking I/O).
@@ -45,9 +52,9 @@
 3. JOIN: Join a channel.
 4. PRIVMSG: Send private messages.
 5. PART: Leave a channel.
-6. Handle Channel Management
 
-- [ ] Store channels and their members.
+Handle Channel Management
+- [x] Store channels and their members.
 - [ ] Implement message broadcasting within a channel.
 - [ ] Implement Operator Privileges
 

@@ -1,25 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.hpp                                          :+:      :+:    :+:   */
+/*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/24 14:56:17 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/12 08:39:27 by gyong-si         ###   ########.fr       */
+/*   Created: 2025/05/12 12:36:25 by gyong-si          #+#    #+#             */
+/*   Updated: 2025/05/12 12:46:10 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
-#include <iostream>
-#include <list>
-#include "server.hpp"
+#define once
 
-class Server;
+#include "iostream"
 
-bool isValidPort(const char *portStr);
-void setupSignalHandler();
-std::list<std::string> splitString(std::string &cmd);
-void sendError(int fd, const std::string &message);
-void sendReply(int fd, const std::string &message);
-std::string getFormattedTime() ;
+#define CRLF "\r\n"
+
+// 421
+std::string ERR_UNKNOWNCOMMAND(const std::string &serverName, const std::string &clientNick, const std::string &cmd);
+// 461
+std::string ERR_NEEDMOREPARAMS(const std::string &serverName, const std::string &clientNick, const std::string &cmd);

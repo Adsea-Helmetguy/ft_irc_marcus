@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/28 15:16:10 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/12 12:59:17 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,12 @@ Server::Server(const std::string &port, const std::string &password)
 	}
 	_name = "ircserv";
 	_port = std::strtol(port.c_str(), NULL, 10);
+	// some checking for password
+	if (password.empty())
+	{
+		std::cerr << "Error: Please provide a password for the server" << std::endl;
+		exit(1);
+	}
 	_password = password;
 
 	// setup the TCP socket
@@ -202,6 +208,9 @@ void	Server::handleIncomingNewClient()
 	}
 }
 
+/**
+ * handles the client's password and checks if it matches with the server.
+ */
 void Server::handlePass(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -209,7 +218,7 @@ void Server::handlePass(int fd, std::list<std::string> cmd_list)
 		return ;
 	if (cmd_list.size() != 2)
 	{
-		// need to change this
+		// need to change this?
 		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
 		return ;
 	}
@@ -234,7 +243,7 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 		return ;
 	if (cmd_list.size() != 2)
 	{
-		// need to change this
+		// I need to change this
 		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
 		return ;
 	}
@@ -243,7 +252,7 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	{
 		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
 		sendError(fd, errorMsg);
-		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
+		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\r\n";
 		return ;
 	}
 	// iterate to the second item in the list
@@ -261,12 +270,13 @@ void Server::sendWelcome(Client *client)
 	std::string nick = client->getNick();
 	int fd = client->getFd();
 
+	/** *
 	std::string msg001 = ":" + serverName + " 001 " + nick +
 		" :Welcome to the IRC server!\r\n";
 	std::string msg002 = ":" + serverName + " 002 " + nick +
 		" :Your host is " + serverName + ", running version 1.0\r\n";
 	std::string msg003 = ":" + serverName + " 003 " + nick +
-		" :This server was created today\r\n";
+		" :This server was created on " + getFormattedTime() + "\r\n";
 	std::string msg004 = ":" + serverName + " 004 " + nick +
 		" " + serverName + " 1.0 o o\r\n";
 	std::string msg375 = ":" + serverName + " 375 " + nick +
@@ -283,11 +293,23 @@ void Server::sendWelcome(Client *client)
 	send(fd, msg375.c_str(), msg375.size(), 0);
 	send(fd, msg372.c_str(), msg372.size(), 0);
 	send(fd, msg376.c_str(), msg376.size(), 0);
+	**/
+
+	sendReply(fd, RPL_WELCOME(serverName, nick));
+	sendReply(fd, RPL_YOURHOST(serverName, nick));
+	sendReply(fd, RPL_CREATED(serverName, nick));
+	sendReply(fd, RPL_MYINFO(serverName, nick));
+
+	sendReply(fd, RPL_MOTDSTART(serverName, nick));
+	sendReply(fd, RPL_MOTD(serverName, nick));
+	sendReply(fd, RPL_ENDOFMOTD(serverName, nick));
 }
 
+/**
+ * Sets the user's nick, username and hostname
+ */
 void Server::handleUser(int fd, std::list<std::string> cmd_list)
 {
-	//std::cout << "entered handleUser";
 	Client *client = getClientByFd(fd);
 	if (!client)
 		return ;
@@ -327,6 +349,10 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 	}
 }
 
+/**
+ * Helps user join a channel. If channel is not created on server, this creates the new channel.
+ * For now we create channels that does not require passwords
+ */
 void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -334,14 +360,14 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		return ;
 	if (cmd_list.size() != 2)
 	{
-		// need to change this
+		// need to change this?
 		send(fd, "ERROR :JOIN command requires exactly one argument\r\n", 50, 0);
 		return ;
 	}
 	// extract the channel name
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
-	const std::string &channelName = *it;
+	const std::string channelName = *it;
 
 	// iterate over _channels to search if the channel already exist
 	Channel *channel = NULL;
@@ -357,27 +383,46 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	if (!channel)
 	{
 		// create a new channel with the name given
-		Channel nc(channelName);
-		// add the client to the channel
-		nc.addMember(client);
+		_channels.push_back(Channel(channelName));
+		// get a reference to the channel created
+		channel = &_channels.back();
+		//channel->addMember(client);
 		// add the client as operator
-		nc.addOperator(client);
-		_channels.push_back(nc);
-		// send a message back to client
-		std::string reply = "JOIN " + channelName + "\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		channel->addOperator(client);
+		// send a message back to client with client details
+		std::string joinReply = ":" + client->getNick(); + "!" + client->getUserName() + "@" + client->getHostName()
+									+ "JOIN " + channelName + "\r\n";
+		send(fd, joinReply.c_str(), joinReply.size(), 0);
+		// send 332 RPL TOPIC
+
+		sendReply(fd, RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()));
+		// server displays message to show new channel is created
 		std::cout << "[INFO] New channel " << channelName
-				  << " created by " << client->getNick() << "\n";
+				  << " created by " << client->getNick() << "\r\n";
+
+		// send 353 RPL_NAMEREPLY
+		std::string clientList = channel->getClientList();
+		// if client list is not empty send it back to client
+		if (!clientList.empty())
+			sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
+
+		// send 366 RPL_ENDOFNAMES
+		sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 	}
 	else
 	{
-		// this channel already exit, add the client as member
+		// this channel already exist, add the client as member
 		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
 			channel->addMember(client);
 			std::string reply = "JOIN " + channelName + "\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
+			// send 353 RPL_NAMEREPLY
+			std::string clientList = channel->getClientList();
+			if (!clientList.empty())
+				sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
+			sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 		}
 	}
 }
@@ -385,6 +430,7 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 
 void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 {
+	Client* client = getClientByFd(fd);
 	const std::string &cmd = cmd_lst.front();
 	const std::string &errorMsg = "ERROR :Unknown command\r\n";
 	if (cmd == "PASS")
@@ -397,14 +443,18 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		handleUser(fd, cmd_lst);
 	else if (cmd == "JOIN")
 		handleJoin(fd, cmd_lst);
+	else if (cmd == "CAP")
+		;
+	else if (cmd == "MODE")
+		;
 	else
-		sendError(fd, errorMsg);
+		sendError(fd, ERR_UNKNOWNCOMMAND(getName(), client->getNick(), cmd));
 }
 
 
 void Server::handleClientConnection(int fd)
 {
-	char buffer[1024];
+	char buffer[512];
 	ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
 
 	// if the client quits, recv will receive 0 when closed or -1 when there is error

@@ -11,6 +11,7 @@ class Channel
 		std::string 			_name;
 		std::vector<Client*>	_members;
 		std::vector<Client*>	_operators;
+		std::string				_topic;
 
 	public:
 		Channel(const std::string &name);
@@ -19,6 +20,8 @@ class Channel
 		// getters
 		const std::string &getName() const;
 		const std::vector<Client*> &getMembers() const;
+		const std::string &getTopic();
+		std::string getClientList();
 		// setters
 		void setName(const std::string &name);
 

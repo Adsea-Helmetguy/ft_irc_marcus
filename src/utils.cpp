@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 14:56:47 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/24 21:30:08 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/12 08:39:42 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,24 @@ void sendError(int fd, const std::string &message)
 {
 	if (send(fd, message.c_str(), message.size(),0) == -1)
 		std::cerr << "Response sent" << std::endl;
+}
+
+void sendReply(int fd, const std::string &message)
+{
+	if (send(fd, message.c_str(), message.size(),0) == -1)
+		std::cerr << "Error MSG sent" << std::endl;
+}
+
+std::string getFormattedTime()
+{
+	time_t rawTime;
+	std::tm *timeInfo;
+	char buffer[80];
+
+	std::time(&rawTime);
+	timeInfo = std::gmtime(&rawTime); // Convert to UTC
+
+	// Format: "Wed Jul 17 2024 at 21:46:54 UTC"
+	std::strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S UTC", timeInfo);
+	return std::string(buffer);
 }
