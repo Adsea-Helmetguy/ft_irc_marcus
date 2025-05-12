@@ -12,13 +12,13 @@
 
 #include "../include/utils.hpp"
 
-void setupSignalHandler()
+void	setupSignalHandler()
 {
 	signal(SIGINT, Server::signalHandler);
 	signal(SIGQUIT, Server::signalHandler);
 }
 
-bool isValidPort(const char *portStr)
+bool	isValidPort(const char *portStr)
 {
 	for (size_t i = 0; portStr[i]; i++)
 		if (!isdigit(portStr[i]))
@@ -28,6 +28,17 @@ bool isValidPort(const char *portStr)
 
 	if (portNum < 1024 || portNum > 65535)
 		return false;
+	return true;
+}
+
+bool	isValidPassword(const std::string password)
+{
+	//IF Password is printable ASCII
+	for (size_t i = 0; i < password.size(); i++)
+	{
+		if (password[i] < 33 || password[i] > 126)
+			return false;
+	}
 	return true;
 }
 
@@ -45,13 +56,13 @@ std::list<std::string> splitString(std::string &cmd)
 	return (lst);
 }
 
-void sendError(int fd, const std::string &message)
+void	sendError(int fd, const std::string &message)
 {
 	if (send(fd, message.c_str(), message.size(),0) == -1)
 		std::cerr << "Response sent" << std::endl;
 }
 
-void sendReply(int fd, const std::string &message)
+void	sendReply(int fd, const std::string &message)
 {
 	if (send(fd, message.c_str(), message.size(),0) == -1)
 		std::cerr << "Error MSG sent" << std::endl;
@@ -69,4 +80,13 @@ std::string getFormattedTime()
 	// Format: "Wed Jul 17 2024 at 21:46:54 UTC"
 	std::strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S UTC", timeInfo);
 	return std::string(buffer);
+}
+
+int	setnonblocking(int client_fd)
+{
+	int flags = fcntl(client_fd, F_GETFL, 0);
+	if (flags == -1)
+		return (-1);
+
+	return (fcntl(client_fd, F_SETFL, flags | O_NONBLOCK));
 }
