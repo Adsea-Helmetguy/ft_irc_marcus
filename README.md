@@ -9,6 +9,14 @@
 1. irssi
 2. /connect localhost port password
 
+
+**Joining a Channel**
+1. /join <#channelname>
+
+**How to kill port if needed**
+1. sudo lsof -i :<PORT> (Get PID from this command)
+2. sudio kill -9 <PID>
+
 ## Phase 1: Understanding the Project Scope
 **Read and Understand the IRC Protocol**
 

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/10 11:06:29 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/12 08:39:02 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 #include <sstream>
 #include <cstdio>
 #include <ctime>
+#include "../include/replies.hpp"
 #include "../include/client.hpp"
 #include "../include/channel.hpp"
 #include "../include/utils.hpp"

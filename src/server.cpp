@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/10 11:10:21 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/12 08:38:35 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,7 +341,7 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	// extract the channel name
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
-	const std::string &channelName = *it;
+	const std::string channelName = *it;
 
 	// iterate over _channels to search if the channel already exist
 	Channel *channel = NULL;
@@ -357,27 +357,46 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	if (!channel)
 	{
 		// create a new channel with the name given
-		Channel nc(channelName);
-		// add the client to the channel
-		nc.addMember(client);
+		_channels.push_back(Channel(channelName));
+		// get a reference to the channel created
+		channel = &_channels.back();
+		//channel->addMember(client);
 		// add the client as operator
-		nc.addOperator(client);
-		_channels.push_back(nc);
-		// send a message back to client
-		std::string reply = "JOIN " + channelName + "\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		channel->addOperator(client);
+		// send a message back to client with client details
+		std::string joinReply = ":" + client->getNick(); + "!" + client->getUserName() + "@" + client->getHostName()
+									+ "JOIN " + channelName + "\r\n";
+		send(fd, joinReply.c_str(), joinReply.size(), 0);
+		// send 332 RPL TOPIC
+
+		sendReply(fd, RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()));
+		// server displays message to show new channel is created
 		std::cout << "[INFO] New channel " << channelName
-				  << " created by " << client->getNick() << "\n";
+				  << " created by " << client->getNick() << "\r\n";
+
+		// send 353 RPL_NAMEREPLY
+		std::string clientList = channel->getClientList();
+		// if client list is not empty send it back to client
+		if (!clientList.empty())
+			sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
+
+		// send 366 RPL_ENDOFNAMES
+		sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 	}
 	else
 	{
-		// this channel already exit, add the client as member
+		// this channel already exist, add the client as member
 		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
 			channel->addMember(client);
 			std::string reply = "JOIN " + channelName + "\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
+			// send 353 RPL_NAMEREPLY
+			std::string clientList = channel->getClientList();
+			if (!clientList.empty())
+				sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
+			sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 		}
 	}
 }

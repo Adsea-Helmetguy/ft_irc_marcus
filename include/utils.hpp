@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 14:56:17 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/10 11:07:28 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/12 08:39:27 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,4 +21,5 @@ bool isValidPort(const char *portStr);
 void setupSignalHandler();
 std::list<std::string> splitString(std::string &cmd);
 void sendError(int fd, const std::string &message);
+void sendReply(int fd, const std::string &message);
 std::string getFormattedTime() ;
