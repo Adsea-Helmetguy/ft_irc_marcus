@@ -35,6 +35,14 @@
 #include "../include/channel.hpp"
 #include "../include/utils.hpp"
 
+# define RT		"\033[0m"
+# define RED	"\033[31m"
+# define YELLOW	"\033[33m"
+# define BLUE	"\033[34m"
+# define CYAN	"\033[0;36m"
+# define GREEN	"\033[32m"
+# define MAG	"\e[0;35m"
+
 # define MAX_EVENTS 10
 
 class Client;

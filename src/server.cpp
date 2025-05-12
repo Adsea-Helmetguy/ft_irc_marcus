@@ -16,19 +16,25 @@ bool Server::_signal = false;
 
 Server::Server(const std::string &port, const std::string &password)
 {
+	if (port.empty() || password.empty())
+	{
+		std::cerr << RED << "Error: Arguments are empty!" << RT << std::endl;
+		exit(1);
+	}
 	if (!isValidPort(port.c_str()))
 	{
-		std::cerr << "Error: Invalid port number. Must be between 1024 and 65535." << std::endl;
+		std::cerr << RED << "Error: Invalid port number. Must be between 1024 and 65535." 
+			<< RT << std::endl;
+		exit(1);
+	}
+	if (!isValidPassword(password))
+	{
+		std::cerr << RED << "Error: Password is invalid. Does it have spaces?" 
+			<< RT << std::endl;
 		exit(1);
 	}
 	_name = "ircserv";
 	_port = std::strtol(port.c_str(), NULL, 10);
-	// some checking for password
-	if (password.empty())
-	{
-		std::cerr << "Error: Please provide a password for the server" << std::endl;
-		exit(1);
-	}
 	_password = password;
 
 	// setup the TCP socket
@@ -186,6 +192,13 @@ void	Server::handleIncomingNewClient()
 	std::cout << "Client connected from: " << client_ip << ":"
 		<< ntohs(clientAddr.sin_port) << std::endl;
 
+	// set the client fd to non blocking
+	if (setnonblocking(client_fd) == -1)
+	{
+		close(client_fd);
+		return ;
+	}
+
 	// Create and store the new client
 	Client newClient(client_fd, client_ip);
 
@@ -193,8 +206,8 @@ void	Server::handleIncomingNewClient()
 	_clients.push_back(newClient);
 
 	// set the client fd to non blocking
-	int flags = fcntl(client_fd, F_GETFL, 0);
-	fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+	//int flags = fcntl(client_fd, F_GETFL, 0);
+	//fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
 
 	// this adds the client fd into epoll
 	struct epoll_event clientEvent;
@@ -432,7 +445,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 {
 	Client* client = getClientByFd(fd);
 	const std::string &cmd = cmd_lst.front();
-	const std::string &errorMsg = "ERROR :Unknown command\r\n";
+	//const std::string &errorMsg = "ERROR :Unknown command\r\n";
 	if (cmd == "PASS")
 		// authenticate the user
 		handlePass(fd, cmd_lst);
@@ -454,7 +467,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 
 void Server::handleClientConnection(int fd)
 {
-	char buffer[512];
+	char buffer[513];
 	ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
 
 	// if the client quits, recv will receive 0 when closed or -1 when there is error

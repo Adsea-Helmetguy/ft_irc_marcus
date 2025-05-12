@@ -17,9 +17,11 @@
 
 class Server;
 
-bool isValidPort(const char *portStr);
-void setupSignalHandler();
+bool    isValidPort(const char *portStr);
+bool	isValidPassword(const std::string password);
+void    setupSignalHandler();
 std::list<std::string> splitString(std::string &cmd);
-void sendError(int fd, const std::string &message);
-void sendReply(int fd, const std::string &message);
-std::string getFormattedTime() ;
+void    sendError(int fd, const std::string &message);
+void    sendReply(int fd, const std::string &message);
+std::string getFormattedTime();
+int     setnonblocking(int client_fd);
