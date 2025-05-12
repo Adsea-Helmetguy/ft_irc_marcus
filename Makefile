@@ -12,6 +12,7 @@ SRCS = main.cpp \
 		server.cpp \
 		client.cpp \
 		replies.cpp \
+		errors.cpp \
 		channel.cpp
 
 # Add "src/" prefix for compilation
