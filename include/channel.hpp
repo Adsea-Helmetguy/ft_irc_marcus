@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include "../include/client.hpp"
+#include "../include/utils.hpp"
 
 class Channel
 {
@@ -20,6 +21,7 @@ class Channel
 		// getters
 		const std::string &getName() const;
 		const std::vector<Client*> &getMembers() const;
+		const std::vector<Client*> &getOperators() const;
 		const std::string &getTopic();
 		std::string getClientList();
 		// setters
@@ -33,4 +35,6 @@ class Channel
 		void addOperator(Client *client);
 		void removeOperator(Client *client);
 		bool isOperator(Client *client) const;
+
+		void broadcast(const std::string &message, Client *exclude);
 };

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/12 12:49:17 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 12:55:52 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@
 # define MAX_EVENTS 10
 
 class Client;
+class Channel;
 
 class Server
 {
@@ -65,11 +66,13 @@ class Server
 
 	public:
 		Server(const std::string &port, const std::string &password);
-		//Server(long &port, const std::string &password);
 		~Server();
 		void		runServer();
 		void		serverInit();
 		static void signalHandler(int signum);
+
+		// getter
+		const std::string &getName() const;
 
 		// add and remove clients
 		void		handleIncomingNewClient();
@@ -80,6 +83,7 @@ class Server
 		void		handleUser(int fd, std::list<std::string> cmd_list);
 		void		handleNick(int fd, std::list<std::string> cmd_list);
 		void		handleJoin(int fd, std::list<std::string> cmd_list);
+		void		handlePart(int fd, std::list<std::string> cmd_list);
 
 		void		sendWelcome(Client *client);
 
@@ -89,7 +93,10 @@ class Server
 		Client* 	getClientByFd(int fd);
 		void		closeClients();
 
-		const std::string &getName() const;
+		// channel
+		Channel*	getChannelByName(const std::string &channelName);
+		void		removeChannel(const std::string &channelName);
+
 
 };
 

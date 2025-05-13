@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/12 12:59:17 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 16:33:40 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@ Server::Server(const std::string &port, const std::string &password)
 	}
 	if (!isValidPort(port.c_str()))
 	{
-		std::cerr << RED << "Error: Invalid port number. Must be between 1024 and 65535." 
+		std::cerr << RED << "Error: Invalid port number. Must be between 1024 and 65535."
 			<< RT << std::endl;
 		exit(1);
 	}
 	if (!isValidPassword(password))
 	{
-		std::cerr << RED << "Error: Password is invalid. Does it have spaces?" 
+		std::cerr << RED << "Error: Password is invalid. Does it have spaces?"
 			<< RT << std::endl;
 		exit(1);
 	}
@@ -283,31 +283,6 @@ void Server::sendWelcome(Client *client)
 	std::string nick = client->getNick();
 	int fd = client->getFd();
 
-	/** *
-	std::string msg001 = ":" + serverName + " 001 " + nick +
-		" :Welcome to the IRC server!\r\n";
-	std::string msg002 = ":" + serverName + " 002 " + nick +
-		" :Your host is " + serverName + ", running version 1.0\r\n";
-	std::string msg003 = ":" + serverName + " 003 " + nick +
-		" :This server was created on " + getFormattedTime() + "\r\n";
-	std::string msg004 = ":" + serverName + " 004 " + nick +
-		" " + serverName + " 1.0 o o\r\n";
-	std::string msg375 = ":" + serverName + " 375 " + nick +
-		" :- " + serverName + " This is ft-irc - \r\n";
-	std::string msg372 = ":" + serverName + " 372 " + nick +
-		" :- Welcome to the IRC server!\r\n";
-	std::string msg376 = ":" + serverName + " 376 " + nick +
-		" :End of /MOTD command.\r\n";
-
-	send(fd, msg001.c_str(), msg001.size(), 0);
-	send(fd, msg002.c_str(), msg002.size(), 0);
-	send(fd, msg003.c_str(), msg003.size(), 0);
-	send(fd, msg004.c_str(), msg004.size(), 0);
-	send(fd, msg375.c_str(), msg375.size(), 0);
-	send(fd, msg372.c_str(), msg372.size(), 0);
-	send(fd, msg376.c_str(), msg376.size(), 0);
-	**/
-
 	sendReply(fd, RPL_WELCOME(serverName, nick));
 	sendReply(fd, RPL_YOURHOST(serverName, nick));
 	sendReply(fd, RPL_CREATED(serverName, nick));
@@ -440,6 +415,82 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	}
 }
 
+void	Server::handlePart(int fd, std::list<std::string> cmd_list)
+{
+	Client *client = getClientByFd(fd);
+	if (!client)
+	{
+		std::cout << "[PART] No client found for fd: " << fd << std::endl;
+		return ;
+	}
+	// if there are only one param, throw error
+	if (cmd_list.size() == 1)
+	{
+		sendError(fd, ERR_NEEDMOREPARAMS(getName(), client->getNick(), cmd_list.front()));
+		std::cout << "[PART] Not enough parameters" << std::endl;
+		return ;
+	}
+	// check if channel exit
+	// extract the channel name
+	std::list<std::string>::const_iterator it = cmd_list.begin();
+	++it;
+	const std::string channelName = *it;
+	std::string reason = "";
+	if (cmd_list.size() > 2)
+	{
+		++it;
+		while (it != cmd_list.end())
+		{
+			if (!reason.empty())
+			{
+				reason += " ";
+			}
+			reason += *it;
+			++it;
+		}
+	}
+	std::cout << "Reason" << std::endl;
+	std::cout << reason << std::endl;
+	// iterate over _channels to search if the channel already exist
+	Channel *channel = getChannelByName(channelName);
+
+	if (!channel)
+	{
+		sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
+		std::cout << "[PART] Channel " << channelName << " not found" << std::endl;
+		return;
+	}
+	if (!channel->isMember(client) && !channel->isOperator(client))
+	{
+		sendError(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), channelName));
+		std::cout << "[PART] Client not in channel " << channelName << std::endl;
+		return;
+	}
+
+	// may need include the parting message
+
+	std::string partMsg = ":" + client->getPrefix() + " PART " + channelName;
+	if (!reason.empty())
+		partMsg += " " + reason;
+	else
+		partMsg + " :";
+	partMsg += "\r\n";
+
+	std::cout << "DEBUG PART MSG: [" << partMsg << "]" << std::endl;
+	sendReply(client->getFd(), partMsg);
+	channel->broadcast(partMsg, client);
+	// remove the member/operator from the channel;
+	channel->removeOperator(client);
+	channel->removeMember(client);
+	// after the user has been removed, broad the message to other users
+	// if there is no more users in the channel, remove it from the channel vector in the server
+	if (channel->getMembers().empty() && channel->getOperators().empty())
+	{
+		removeChannel(channel->getName());
+		sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
+	}
+}
+
 
 void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 {
@@ -460,6 +511,8 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		;
 	else if (cmd == "MODE")
 		;
+	else if (cmd == "PART")
+		handlePart(fd, cmd_lst);
 	else
 		sendError(fd, ERR_UNKNOWNCOMMAND(getName(), client->getNick(), cmd));
 }
@@ -483,7 +536,6 @@ void Server::handleClientConnection(int fd)
 		std::string command(buffer);
 
 		std::cout << "Received from client " << fd << ": " << command << std::endl;
-		//Client* client = getClientByFd(fd);
 
 		// break the command from the user into individual str
 		// the client can send multiple lines to the user
@@ -516,6 +568,30 @@ Client*	Server::getClientByFd(int fd)
 	return (NULL);
 };
 
+Channel* Server::getChannelByName(const std::string &channelName)
+{
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++)
+	{
+		if (it->getName() == (channelName))
+		{
+			return &(*it);
+		}
+	}
+	return (NULL);
+}
+
+void	Server::removeChannel(const std::string &channelName)
+{
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (it->getName() == channelName)
+		{
+			_channels.erase(it);
+			std::cout << "[INFO] Channel \"" << channelName << "\" has been removed." << std::endl;
+			return ;
+		}
+	}
+}
 
 
 // remove the client from the client list

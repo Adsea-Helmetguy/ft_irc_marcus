@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/25 13:03:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/04/17 13:52:05 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 14:50:09 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,13 @@ const std::string &Client::getUserName() const
 const std::string &Client::getHostName() const
 {
 	return (_hostname);
+}
+
+std::string Client::getPrefix() const
+{
+	std::string prefix;
+	prefix = getNick() + "!" + getUserName() + "@" + getHostName();
+	return (prefix);
 }
 
 void Client::set_fd(int &fd)
