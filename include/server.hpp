@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/13 12:55:52 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 22:36:16 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
+		Client* getClientByNick(const std::string &clientNick)l
 
 		// add and remove clients
 		void		handleIncomingNewClient();
@@ -84,7 +85,7 @@ class Server
 		void		handleNick(int fd, std::list<std::string> cmd_list);
 		void		handleJoin(int fd, std::list<std::string> cmd_list);
 		void		handlePart(int fd, std::list<std::string> cmd_list);
-
+		void		handlePrivmsg(int fd, std::list<std::string> cmd_list);
 		void		sendWelcome(Client *client);
 
 		void		execute_cmd(int fd, std::list<std::string> cmd);

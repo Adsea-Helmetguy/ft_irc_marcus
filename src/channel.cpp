@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/13 15:59:24 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 22:30:49 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,22 @@ const std::string &Channel::getTopic()
 {
 	return (_topic);
 }
+
+Client* Channel::getClientByNick(std::string &clientNick)
+{
+	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+	{
+		if ((*it)->getNick() == clientNick)
+			return (*it);
+	}
+	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	{
+		if ((*it)->getNick() == clientNick)
+			return (*it);
+	}
+	return (NULL);
+}
+
 
 /**
  * This function works now
