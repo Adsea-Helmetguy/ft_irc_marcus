@@ -12,6 +12,9 @@
 **Joining a Channel**
 1. /join <#channelname>
 
+**Leaving a Channel**
+1. /part <#channelname> <optional reason>
+
 **How to kill port if needed**
 1. sudo lsof -i :<PORT> (Get PID from this command)
 2. sudo kill -9 <PID>

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/12 08:41:17 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/13 15:59:24 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,19 @@ const std::vector<Client*> &Channel::getMembers() const
 	return (_members);
 }
 
+const std::vector<Client*> &Channel::getOperators() const
+{
+	return (_operators);
+}
+
+
 const std::string &Channel::getTopic()
 {
 	return (_topic);
 }
 
 /**
- * This function segfaults
+ * This function works now
  */
 std::string Channel::getClientList()
 {
@@ -65,7 +71,8 @@ void Channel::setName(const std::string &name)
 
 void Channel::addMember(Client *client)
 {
-	_members.push_back(client);
+	if (!isMember(client))
+		_members.push_back(client);
 }
 
 void Channel::removeMember(Client *client)
@@ -88,7 +95,8 @@ bool Channel::isMember(Client *client)
 
 void Channel::addOperator(Client *client)
 {
-	_operators.push_back(client);
+	if (!isOperator(client))
+		_operators.push_back(client);
 }
 
 void Channel::removeOperator(Client *client)
@@ -102,4 +110,21 @@ void Channel::removeOperator(Client *client)
 bool Channel::isOperator(Client *client) const
 {
 	return (std::find(_operators.begin(), _operators.end(), client) != _operators.end());
+}
+
+/**
+ * Sends a message to all members of a channel
+ */
+void Channel::broadcast(const std::string &message, Client *exclude)
+{
+	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+	{
+		if (*it != exclude)
+			sendReply((*it)->getFd(), message);
+	}
+	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	{
+		if (*it != exclude)
+			sendReply((*it)->getFd(), message);
+	}
 }

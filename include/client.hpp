@@ -21,6 +21,7 @@ class Client
 		const std::string &getNick() const;
 		const std::string &getUserName() const;
 		const std::string &getHostName() const;
+		std::string getPrefix() const;
 		void set_fd(int &fd);
 		void set_ip(std::string ip_addr);
 		void set_nick(std::string &nick);
