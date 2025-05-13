@@ -47,6 +47,37 @@ std::list<std::string> splitString(std::string &cmd)
 	std::list<std::string> lst;
 	std::istringstream stm(cmd);
 	std::string token;
+	std::string name;
+
+	//while (stm >> token)
+	for (int loop = 1; stm >> token; loop++)
+	{
+		std::cout << YELLOW << "LOOP-> " << loop
+			<< " | Token = " << RT << token << std::endl;
+		if (loop >= 5)
+		{
+			name += token + " ";
+			continue;
+		}
+		lst.push_back(token);
+		token.clear();
+	}
+	if (!name.empty() && name[name.size() - 1] == ' ')
+	{
+		name.erase((name.size() - 1), 1);
+		std::cout << "The localhost name = \"" << YELLOW 
+			<< name << RT << "\"" << std::endl;
+		lst.push_back(name);
+	}
+	return (lst);
+}
+
+/*
+std::list<std::string> splitString(std::string &cmd)
+{
+	std::list<std::string> lst;
+	std::istringstream stm(cmd);
+	std::string token;
 
 	while (stm >> token)
 	{
@@ -55,6 +86,7 @@ std::list<std::string> splitString(std::string &cmd)
 	}
 	return (lst);
 }
+*/
 
 void	sendError(int fd, const std::string &message)
 {
