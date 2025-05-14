@@ -15,6 +15,10 @@
 **Leaving a Channel**
 1. /part <#channelname> <optional reason>
 
+**Sending a message**
+1. /privmsg is not needed just type the message
+2. For private message just type the nick of the target followed by message
+
 **How to kill port if needed**
 1. sudo lsof -i :<PORT> (Get PID from this command)
 2. sudo kill -9 <PID>

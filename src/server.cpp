@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 10:24:54 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/14 13:30:18 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -500,6 +500,8 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 		removeChannel(channel->getName());
 		sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
 	}
+	else
+		sendError(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), channelName));
 }
 
 void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
