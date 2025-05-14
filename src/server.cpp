@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 13:30:18 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/14 16:43:26 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -491,11 +491,11 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 	sendReply(client->getFd(), partMsg);
 	channel->broadcast(partMsg, client);
 	// remove the member/operator from the channel;
-	channel->removeOperator(client);
-	channel->removeMember(client);
+	channel->removeUser(client);
+
 	// after the user has been removed, broad the message to other users
 	// if there is no more users in the channel, remove it from the channel vector in the server
-	if (channel->getMembers().empty() && channel->getOperators().empty())
+	if (channel->getUsers().empty())
 	{
 		removeChannel(channel->getName());
 		sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));

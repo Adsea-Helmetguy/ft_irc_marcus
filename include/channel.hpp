@@ -6,12 +6,21 @@
 #include "../include/client.hpp"
 #include "../include/utils.hpp"
 
+struct ChannelUser
+{
+	Client* client;
+	bool	isOperator;
+
+	ChannelUser(Client* c, bool isOp = false) : client(c), isOperator(isOp) {}
+};
+
 class Channel
 {
 	private:
 		std::string 			_name;
-		std::vector<Client*>	_members;
-		std::vector<Client*>	_operators;
+		//std::vector<Client*>	_members;
+		//std::vector<Client*>	_operators;
+		std::vector<ChannelUser> _users;
 		std::string				_topic;
 
 	public:
@@ -20,21 +29,20 @@ class Channel
 
 		// getters
 		const std::string &getName() const;
-		const std::vector<Client*> &getMembers() const;
-		const std::vector<Client*> &getOperators() const;
 		const std::string &getTopic();
+		const std::vector<ChannelUser>& getUsers() const;
 		std::string getClientList();
 		// setters
 		void setName(const std::string &name);
 
 		// add members
-		void addMember(Client *client);
-		void removeMember(Client *client);
 		bool isMember(Client *client);
+		void addMember(Client *client);
 		// add operators
 		void addOperator(Client *client);
-		void removeOperator(Client *client);
+
 		bool isOperator(Client *client) const;
+		void removeUser(Client *client);
 
 		void broadcast(const std::string &message, Client *exclude);
 };
