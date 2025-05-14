@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/13 16:33:40 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/14 13:30:18 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,17 @@ Server &Server::operator=(const Server &src)
 const std::string &Server::getName() const
 {
 	return (_name);
+}
+
+
+Client* Server::getClientByNick(const std::string &clientNick)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (it->getNick() == clientNick)
+			return &(*it);
+	}
+	return (NULL);
 }
 
 void Server::serverInit()
@@ -489,7 +500,67 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 		removeChannel(channel->getName());
 		sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
 	}
+	else
+		sendError(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), channelName));
 }
+
+void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
+{
+	Client *client = getClientByFd(fd);
+	if (!client)
+	{
+		std::cout << "[PART] No client found for fd: " << fd << std::endl;
+		return ;
+	}
+	// if there are only one param, throw error
+	if (cmd_list.size() < 3)
+	{
+		sendError(fd, ERR_NEEDMOREPARAMS(getName(), client->getNick(), cmd_list.front()));
+		std::cout << "[PART] Not enough parameters" << std::endl;
+		return ;
+	}
+	std::list<std::string>::iterator it = cmd_list.begin();
+	++it;
+	std::string target = *it++;
+	std::string message;
+	// add all the strings into message
+	while (it != cmd_list.end())
+	{
+		if (!message.empty())
+			message += " ";
+		message += *it++;
+	}
+	if (message[0] == ':')
+		message = message.substr(1);
+
+	if (target[0] == '#')
+	{
+		Channel *channel = getChannelByName(target);
+		if (!channel || (!channel->isMember(client) && !channel->isOperator(client)))
+		{
+			sendError(fd, ERR_CANNOTSENDTOCHAN(getName(), client->getNick(), channel->getName()));
+			return ;
+		}
+		std::string out = ":" + client->getPrefix() + " PRIVMSG " + target + " :" + message + CRLF;
+		channel->broadcast(out, client);
+	}
+	else
+	{
+		// find the target in the server _clients
+		Client* targetUser = getClientByNick(target);
+		if (!targetUser)
+		{
+			ERR_NOSUCHNICK(getName(), client->getNick(), target);
+			return ;
+		}
+
+		std::string out = ":" + client->getPrefix() + " PRIVMSG " + target + " :" + message + CRLF;
+		// send the message to the target user
+		sendReply(targetUser->getFd(), out);
+	}
+
+}
+
 
 
 void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
@@ -513,6 +584,8 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		;
 	else if (cmd == "PART")
 		handlePart(fd, cmd_lst);
+	else if (cmd == "PRIVMSG")
+		handlePrivmsg(fd, cmd_lst);
 	else
 		sendError(fd, ERR_UNKNOWNCOMMAND(getName(), client->getNick(), cmd));
 }

@@ -18,6 +18,7 @@ class Client
 		Client(int client_fd, std::string &client_ip);
 		~Client() {};
 		const int &getFd() const;
+		const Client* &getClientByNick(const std::string clientNick);
 		const std::string &getNick() const;
 		const std::string &getUserName() const;
 		const std::string &getHostName() const;
