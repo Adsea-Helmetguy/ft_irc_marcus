@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/13 22:36:16 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/14 10:23:22 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
-		Client* getClientByNick(const std::string &clientNick)l
+		Client* getClientByNick(const std::string &clientNick);
 
 		// add and remove clients
 		void		handleIncomingNewClient();
@@ -97,8 +97,6 @@ class Server
 		// channel
 		Channel*	getChannelByName(const std::string &channelName);
 		void		removeChannel(const std::string &channelName);
-
-
 };
 
 bool isValidPort(const char *portStr);

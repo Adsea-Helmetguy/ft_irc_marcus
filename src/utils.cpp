@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 14:56:47 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/12 08:39:42 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/14 09:42:31 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,13 +59,13 @@ std::list<std::string> splitString(std::string &cmd)
 void	sendError(int fd, const std::string &message)
 {
 	if (send(fd, message.c_str(), message.size(),0) == -1)
-		std::cerr << "Response sent" << std::endl;
+		std::cerr << "Error MSG sent" << std::endl;
 }
 
 void	sendReply(int fd, const std::string &message)
 {
 	if (send(fd, message.c_str(), message.size(),0) == -1)
-		std::cerr << "Error MSG sent" << std::endl;
+		std::cerr << "Reply sent" << std::endl;
 }
 
 std::string getFormattedTime()
