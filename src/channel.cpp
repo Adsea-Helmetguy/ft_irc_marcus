@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 16:32:58 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/15 15:54:45 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,21 +89,6 @@ void Channel::addOperator(Client *client)
 	_users.push_back(ChannelUser(client, true));
 }
 
-/**
- * Sends a message to all members of a channel
- */
-void Channel::broadcast(const std::string &message, Client *exclude)
-{
-	// loop through the _users vector to send the message
-	for (size_t i = 0; i < _users.size(); ++i)
-	{
-		if (_users[i].client != exclude)
-		{
-			sendReply(_users[i].client->getFd(), message);
-		}
-	}
-}
-
 void Channel::removeUser(Client *client)
 {
 	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
@@ -113,5 +98,31 @@ void Channel::removeUser(Client *client)
 			_users.erase(it);
 			break ;
 		}
+	}
+}
+
+/**
+ * Sends a message to all members of a channel except the user specified
+ */
+void Channel::broadcast(const std::string &message, const Client *exclude)
+{
+	// loop through the _users vector to send the message
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (it->client != exclude)
+		{
+			sendReply(it->client->getFd(), message);
+		}
+	}
+}
+
+/**
+ * Sends the message to everybody.
+ */
+void Channel::broadcast(const std::string &message)
+{
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		sendReply(it->client->getFd(), message);
 	}
 }

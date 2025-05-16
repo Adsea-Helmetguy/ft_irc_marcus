@@ -30,7 +30,7 @@ class Channel
 		// getters
 		const std::string &getName() const;
 		const std::string &getTopic();
-		const std::vector<ChannelUser>& getUsers() const;
+		const std::vector<ChannelUser> &getUsers() const;
 		std::string getClientList();
 		// setters
 		void setName(const std::string &name);
@@ -44,5 +44,7 @@ class Channel
 		bool isOperator(Client *client) const;
 		void removeUser(Client *client);
 
-		void broadcast(const std::string &message, Client *exclude);
+		void broadcast(const std::string &message, const Client *exclude);
+		void broadcast(const std::string &message);
+
 };

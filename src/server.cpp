@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 16:43:26 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 09:19:51 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -369,15 +369,8 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	const std::string channelName = *it;
 
 	// iterate over _channels to search if the channel already exist
-	Channel *channel = NULL;
-	for (std::vector<Channel>::iterator ch = _channels.begin(); ch != _channels.end(); ++ch)
-	{
-		if (ch->getName() == channelName)
-		{
-			channel = &(*ch);
-			break ;
-		}
-	}
+	Channel *channel = getChannelByName(channelName);
+
 	// if the channel does not exit, create the channel
 	if (!channel)
 	{
@@ -385,28 +378,21 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		_channels.push_back(Channel(channelName));
 		// get a reference to the channel created
 		channel = &_channels.back();
-		//channel->addMember(client);
 		// add the client as operator
 		channel->addOperator(client);
-		// send a message back to client with client details
-		std::string joinReply = ":" + client->getNick(); + "!" + client->getUserName() + "@" + client->getHostName()
-									+ "JOIN " + channelName + "\r\n";
-		send(fd, joinReply.c_str(), joinReply.size(), 0);
-		// send 332 RPL TOPIC
-
-		sendReply(fd, RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()));
 		// server displays message to show new channel is created
 		std::cout << "[INFO] New channel " << channelName
 				  << " created by " << client->getNick() << "\r\n";
 
-		// send 353 RPL_NAMEREPLY
 		std::string clientList = channel->getClientList();
-		// if client list is not empty send it back to client
-		if (!clientList.empty())
-			sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
-
-		// send 366 RPL_ENDOFNAMES
-		sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
+		// send all the message together to irssi
+		sendReply(fd,
+		RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) +
+		RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()) +
+		RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList) +
+		RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
+		// broadcast the join mesasge to all others except user
+		channel->broadcast(RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName), client);
 	}
 	else
 	{
@@ -415,13 +401,21 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		if (!channel->isMember(client))
 		{
 			channel->addMember(client);
-			std::string reply = "JOIN " + channelName + "\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
-			// send 353 RPL_NAMEREPLY
+
+			std::cout << "[JOIN] " << client->getNick() << " joined " << channelName << "\n";
+			std::cout << "[USERS] " << channel->getClientList() << "\n";
+
 			std::string clientList = channel->getClientList();
-			if (!clientList.empty())
-				sendReply(fd, RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList));
-			sendReply(fd, RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
+
+			// send all the message together to irssi
+			sendReply(fd,
+			RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) +
+			RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()) +
+			RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList) +
+			RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
+			std::cout << RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) << std::endl;
+			// broadcast the join mesasge to all others except user
+			channel->broadcast(RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName), client);
 		}
 	}
 }
@@ -509,14 +503,14 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 	Client *client = getClientByFd(fd);
 	if (!client)
 	{
-		std::cout << "[PART] No client found for fd: " << fd << std::endl;
+		std::cout << "[PRIVMSG] No client found for fd: " << fd << std::endl;
 		return ;
 	}
 	// if there are only one param, throw error
 	if (cmd_list.size() < 3)
 	{
 		sendError(fd, ERR_NEEDMOREPARAMS(getName(), client->getNick(), cmd_list.front()));
-		std::cout << "[PART] Not enough parameters" << std::endl;
+		std::cout << "[PRIVMSG] Not enough parameters" << std::endl;
 		return ;
 	}
 	std::list<std::string>::iterator it = cmd_list.begin();
@@ -533,15 +527,27 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 	if (message[0] == ':')
 		message = message.substr(1);
 
+	if (target[0] == '#') {
+		std::cout << "[DEBUG] Message is for channel: " << target << std::endl;
+	} else {
+		std::cout << "[DEBUG] Message is for user: " << target << std::endl;
+	}
+
 	if (target[0] == '#')
 	{
 		Channel *channel = getChannelByName(target);
-		if (!channel || (!channel->isMember(client) && !channel->isOperator(client)))
+		if (!channel)
+		{
+			sendError(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channel->getName()));
+			return ;
+		}
+		if (!channel->isMember(client))
 		{
 			sendError(fd, ERR_CANNOTSENDTOCHAN(getName(), client->getNick(), channel->getName()));
 			return ;
 		}
 		std::string out = ":" + client->getPrefix() + " PRIVMSG " + target + " :" + message + CRLF;
+		std::cout << out << std::endl;
 		channel->broadcast(out, client);
 	}
 	else
@@ -550,15 +556,16 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 		Client* targetUser = getClientByNick(target);
 		if (!targetUser)
 		{
+			std::cerr << "[DEBUG] No such user: " << target << std::endl;
 			ERR_NOSUCHNICK(getName(), client->getNick(), target);
 			return ;
 		}
-
+		std::cout << "[DEBUG] Target nick: " << targetUser->getNick() << std::endl;
 		std::string out = ":" + client->getPrefix() + " PRIVMSG " + target + " :" + message + CRLF;
+		std::cout << out << std::endl;
 		// send the message to the target user
 		sendReply(targetUser->getFd(), out);
 	}
-
 }
 
 

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 21:19:57 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/10 23:47:23 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/15 20:53:17 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,9 @@ std::string RPL_NAMEREPLY(const std::string &serverName, const std::string &clie
 std::string RPL_ENDOFNAMES(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
 {
 	return (":" + serverName + " 366 " + clientNick + " " + channelName + " :End of /NAMES list." + CRLF);
+}
+
+std::string RPL_JOINMSG(const std::string &clientNick, const std::string &clientUsername, const std::string &clientHostname, const std::string &channelName)
+{
+	return (":" + clientNick + "!" + clientUsername + "@" + clientHostname + " JOIN " + channelName + CRLF);
 }

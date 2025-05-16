@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 13:47:50 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/10 23:45:27 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/15 20:54:29 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,3 +39,5 @@ std::string RPL_TOPIC(const std::string &serverName, const std::string &clientNi
 std::string RPL_NAMEREPLY(const std::string &serverName, const std::string &clientNick, const std::string &channelName, std::string &clientList);
 // 366
 std::string RPL_ENDOFNAMES(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
+
+std::string RPL_JOINMSG(const std::string &clientNick, const std::string &clientUsername, const std::string &clientHostname, const std::string &channelName);
