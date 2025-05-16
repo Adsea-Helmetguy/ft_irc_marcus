@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 12:18:37 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 14:28:40 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,8 @@ class Server
 		void		handleJoin(int fd, std::list<std::string> cmd_list);
 		void		handlePart(int fd, std::list<std::string> cmd_list);
 		void		handlePrivmsg(int fd, std::list<std::string> cmd_list);
+		void		handlePing(int fd, std::list<std::string> cmd_lst);
+
 		void		sendWelcome(Client *client);
 
 		void		execute_cmd(int fd, std::list<std::string> cmd);
