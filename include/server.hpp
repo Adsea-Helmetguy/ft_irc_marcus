@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 10:23:22 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 10:42:38 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ class Server
 		int					_socket_fd;
 		struct sockaddr_in 	_serverAdd;
 		int 				_epoll_fd;
+		std::string			_created_time;
 		std::vector<Client>	_clients;
 		std::vector<Channel> _channels;
 
@@ -73,6 +74,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
+		const std::string &getCreatedTime() const;
 		Client* getClientByNick(const std::string &clientNick);
 
 		// add and remove clients

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/15 15:54:45 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 10:35:28 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,8 @@ void Channel::broadcast(const std::string &message, const Client *exclude)
 	{
 		if (it->client != exclude)
 		{
+			std::cout << "[DEBUG] About to send to FD: " << it->client->getFd()
+			<< ", nick: " << it->client->getNick() << std::endl;
 			sendReply(it->client->getFd(), message);
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 21:19:57 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/15 20:53:17 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 10:45:09 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ std::string RPL_YOURHOST(const std::string &serverName, const std::string &clien
 }
 
 // Builds 003 string
-std::string RPL_CREATED(const std::string &serverName, const std::string &clientNick)
+std::string RPL_CREATED(const std::string &serverName, const std::string &clientNick, const std::string &createdTime)
 {
-	return (":" + serverName + " 003 " + clientNick + " :This server was created on " + getFormattedTime() + CRLF);
+	return (":" + serverName + " 003 " + clientNick + " :This server was created on " + createdTime + CRLF);
 }
 
 // Builds 004 string

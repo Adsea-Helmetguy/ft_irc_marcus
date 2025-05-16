@@ -18,8 +18,6 @@ class Channel
 {
 	private:
 		std::string 			_name;
-		//std::vector<Client*>	_members;
-		//std::vector<Client*>	_operators;
 		std::vector<ChannelUser> _users;
 		std::string				_topic;
 

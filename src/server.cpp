@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 09:19:51 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 10:45:48 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ Server::Server(const std::string &port, const std::string &password)
 	_name = "ircserv";
 	_port = std::strtol(port.c_str(), NULL, 10);
 	_password = password;
+	_created_time = getFormattedTime();
 
 	// setup the TCP socket
 	this->serverInit();
@@ -284,7 +285,9 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	std::string second = *it;
-	client->set_nick(second);
+	// check if the nickname has a max of 9 characters
+	if (second.length() <= 9)
+		client->set_nick(second);
 	std::cout << "[NICK] " << second << " has been saved." << std::endl;
 }
 
@@ -296,7 +299,7 @@ void Server::sendWelcome(Client *client)
 
 	sendReply(fd, RPL_WELCOME(serverName, nick));
 	sendReply(fd, RPL_YOURHOST(serverName, nick));
-	sendReply(fd, RPL_CREATED(serverName, nick));
+	sendReply(fd, RPL_CREATED(serverName, nick, _created_time));
 	sendReply(fd, RPL_MYINFO(serverName, nick));
 
 	sendReply(fd, RPL_MOTDSTART(serverName, nick));
