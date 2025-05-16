@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 21:19:57 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 10:45:09 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 14:34:37 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,4 +77,10 @@ std::string RPL_ENDOFNAMES(const std::string &serverName, const std::string &cli
 std::string RPL_JOINMSG(const std::string &clientNick, const std::string &clientUsername, const std::string &clientHostname, const std::string &channelName)
 {
 	return (":" + clientNick + "!" + clientUsername + "@" + clientHostname + " JOIN " + channelName + CRLF);
+}
+
+// pong reply
+std::string RPL_PONG(const std::string token)
+{
+	return ("PONG " + token + CRLF);
 }

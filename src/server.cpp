@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 12:26:29 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 14:34:22 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,11 +284,20 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	// /NICK nickname
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
-	std::string second = *it;
+	std::string newNick = *it;
 	// check if the nickname has a max of 9 characters
-	if (second.length() <= 9)
-		client->set_nick(second);
-	std::cout << "[NICK] " << second << " has been saved." << std::endl;
+
+	if (newNick.length() > 9)
+	{
+		sendError(fd, "ERROR :Nickname too long\r\n");
+		return;
+	}
+	std::string oldNick = client->getNick();
+	client->set_nick(newNick);
+	std::cout << "[NICK] " << oldNick << " changed to " << newNick << std::endl;
+	std::string nickReply = ":" + oldNick + "!" + client->getUserName() + "@" +
+	client->getHostName() + " NICK :" + newNick + CRLF;
+	sendReply(fd, nickReply);
 }
 
 void Server::sendWelcome(Client *client)
@@ -422,6 +431,22 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		}
 	}
 }
+
+void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
+{
+	if (cmd_lst.size() < 2)
+	{
+		sendError(fd, "ERROR :No ping argument\r\n");
+		return;
+	}
+	std::list<std::string>::iterator it = cmd_lst.begin();
+	++it;
+	std::string token = *it;
+	sendReply(fd, RPL_PONG(token));
+	std::cout << "[PING] Replied with: " << RPL_PONG(token);
+}
+
+
 
 void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 {
@@ -588,6 +613,8 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		handleUser(fd, cmd_lst);
 	else if (cmd == "JOIN")
 		handleJoin(fd, cmd_lst);
+	else if (cmd == "PING")
+		handlePing(fd, cmd_lst);
 	else if (cmd == "CAP")
 		;
 	else if (cmd == "MODE")
