@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 10:23:22 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 12:18:37 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,15 +51,16 @@ class Channel;
 class Server
 {
 	private:
-		std::string			_name;
-		long 				_port;
-		std::string			_password;
-		static bool			_signal;
-		int					_socket_fd;
-		struct sockaddr_in 	_serverAdd;
-		int 				_epoll_fd;
-		std::vector<Client>	_clients;
-		std::vector<Channel> _channels;
+		std::string				_name;
+		long 					_port;
+		std::string				_password;
+		static bool				_signal;
+		int						_socket_fd;
+		struct sockaddr_in		_serverAdd;
+		int 					_epoll_fd;
+		std::string				_created_time;
+		std::vector<Client*>	_clients;
+		std::vector<Channel>	_channels;
 
 		Server(const Server &src);
 		Server &operator=(const Server &src);
@@ -73,6 +74,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
+		const std::string &getCreatedTime() const;
 		Client* getClientByNick(const std::string &clientNick);
 
 		// add and remove clients
@@ -90,7 +92,7 @@ class Server
 
 		void		execute_cmd(int fd, std::list<std::string> cmd);
 		void		removeClient(int fd);
-		const 		std::vector<Client>& getClients() const;
+		const 		std::vector<Client*>& getClients() const;
 		Client* 	getClientByFd(int fd);
 		void		closeClients();
 

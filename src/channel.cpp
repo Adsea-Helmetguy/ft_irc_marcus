@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 10:25:10 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 12:05:28 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,22 +22,15 @@ const std::string &Channel::getName() const
 	return (_name);
 }
 
-const std::vector<Client*> &Channel::getMembers() const
-{
-	return (_members);
-}
-
-const std::vector<Client*> &Channel::getOperators() const
-{
-	return (_operators);
-}
-
-
 const std::string &Channel::getTopic()
 {
 	return (_topic);
 }
 
+const std::vector<ChannelUser> &Channel::getUsers() const
+{
+	return (_users);
+}
 
 /**
  * This function works now
@@ -46,19 +39,14 @@ std::string Channel::getClientList()
 {
 	std::string clientList = "";
 
-	for (size_t i = 0; i < _operators.size(); ++i)
+	for (size_t i = 0; i < _users.size(); ++i)
 	{
-		clientList += "@" + _operators[i]->getNick();
-		if ((i + 1) < _operators.size())
-			clientList + " ";
-	}
-	if (_members.size())
-		clientList += " ";
-	for (size_t i = 0; i < _members.size(); ++i)
-	{
-		clientList += "@" + _members[i]->getNick();
-		if ((i + 1) < _members.size())
-			clientList + " ";
+		if (!clientList.empty())
+			clientList += " ";
+		if (_users[i].isOperator)
+			clientList += "@" + _users[i].client->getNick();
+		else
+			clientList += _users[i].client->getNick();
 	}
 	std::cout << "Printing client list" << std::endl;
 	std::cout << clientList << std::endl;
@@ -70,25 +58,27 @@ void Channel::setName(const std::string &name)
 	_name = name;
 }
 
-void Channel::addMember(Client *client)
-{
-	if (!isMember(client))
-		_members.push_back(client);
-}
-
-void Channel::removeMember(Client *client)
-{
-	_members.erase(
-		std::remove(_members.begin(), _members.end(), client),
-		_members.end()
-	);
-}
-
 bool Channel::isMember(Client *client)
 {
-	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
-		if (*it == client)
+		if (it->client == client)
+			return (true);
+	}
+	return (false);
+}
+
+void Channel::addMember(Client *client)
+{
+	_users.push_back(ChannelUser(client, false));
+}
+
+
+bool Channel::isOperator(Client *client) const
+{
+	for (size_t i = 0; i < _users.size(); ++i)
+	{
+		if (_users[i].client == client && _users[i].isOperator)
 			return (true);
 	}
 	return (false);
@@ -96,36 +86,44 @@ bool Channel::isMember(Client *client)
 
 void Channel::addOperator(Client *client)
 {
-	if (!isOperator(client))
-		_operators.push_back(client);
+	_users.push_back(ChannelUser(client, true));
 }
 
-void Channel::removeOperator(Client *client)
+void Channel::removeUser(Client *client)
 {
-	_operators.erase(
-		std::remove(_operators.begin(), _operators.end(), client),
-		_operators.end()
-	);
-}
-
-bool Channel::isOperator(Client *client) const
-{
-	return (std::find(_operators.begin(), _operators.end(), client) != _operators.end());
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (it->client == client)
+		{
+			_users.erase(it);
+			break ;
+		}
+	}
 }
 
 /**
- * Sends a message to all members of a channel
+ * Sends a message to all members of a channel except the user specified
  */
-void Channel::broadcast(const std::string &message, Client *exclude)
+void Channel::broadcast(const std::string &message, const Client *exclude)
 {
-	for (std::vector<Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+	// loop through the _users vector to send the message
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
-		if (*it != exclude)
-			sendReply((*it)->getFd(), message);
+		if (it->client != exclude)
+		{
+			std::cout << "Sending to client with fd: " << it->client->getFd() << std::endl;
+			sendReply(it->client->getFd(), message);
+		}
 	}
-	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+}
+
+/**
+ * Sends the message to everybody.
+ */
+void Channel::broadcast(const std::string &message)
+{
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
-		if (*it != exclude)
-			sendReply((*it)->getFd(), message);
+		sendReply(it->client->getFd(), message);
 	}
 }

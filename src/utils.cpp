@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 14:56:47 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/14 09:42:31 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 12:06:06 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ std::list<std::string> splitString(std::string &cmd)
 	if (!name.empty() && name[name.size() - 1] == ' ')
 	{
 		name.erase((name.size() - 1), 1);
-		std::cout << "The localhost name = \"" << YELLOW 
+		std::cout << "The localhost name = \"" << YELLOW
 			<< name << RT << "\"" << std::endl;
 		lst.push_back(name);
 	}
@@ -96,8 +96,15 @@ void	sendError(int fd, const std::string &message)
 
 void	sendReply(int fd, const std::string &message)
 {
+	/** *
 	if (send(fd, message.c_str(), message.size(),0) == -1)
 		std::cerr << "Reply sent" << std::endl;
+	**/
+	ssize_t n = send(fd, message.c_str(), message.size(), 0);
+	if (n == -1)
+		perror("send");
+	else
+		std::cout << "[DEBUG] Sent " << n << " bytes to fd: " << fd << std::endl;
 }
 
 std::string getFormattedTime()

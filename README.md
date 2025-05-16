@@ -57,12 +57,13 @@
 1. NICK: Set the client's nickname.
 2. USER: Register the username.
 3. JOIN: Join a channel.
-4. PRIVMSG: Send private messages.
+4. PRIVMSG: Send messages.
+5. MSG: Send a private message to a user.
 5. PART: Leave a channel.
 
 Handle Channel Management
 - [x] Store channels and their members.
-- [ ] Implement message broadcasting within a channel.
+- [x] Implement message broadcasting within a channel.
 - [ ] Implement Operator Privileges
 
 1. KICK: Remove a user from a channel.
