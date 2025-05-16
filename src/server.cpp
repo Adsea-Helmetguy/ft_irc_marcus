@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 10:45:48 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/16 12:26:29 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,10 +72,10 @@ const std::string &Server::getName() const
 
 Client* Server::getClientByNick(const std::string &clientNick)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		if (it->getNick() == clientNick)
-			return &(*it);
+		if ((*it)->getNick() == clientNick)
+			return (*it);
 	}
 	return (NULL);
 }
@@ -212,7 +212,7 @@ void	Server::handleIncomingNewClient()
 	}
 
 	// Create and store the new client
-	Client newClient(client_fd, client_ip);
+	Client* newClient = new Client(client_fd, client_ip);
 
 	// this adds the client into the clients list
 	_clients.push_back(newClient);
@@ -630,7 +630,7 @@ void Server::handleClientConnection(int fd)
 		{
 			if (!line.empty() && line[line.size() - 1] == '\r')
 				line.erase(line.size() - 1, 1);
-			std::cout << line << std::endl;
+			//std::cout << line << std::endl;
 			std::list<std::string> cmd_lst = splitString(line);
 			// function to execute cmd
 			if (!cmd_lst.empty())
@@ -641,11 +641,11 @@ void Server::handleClientConnection(int fd)
 
 Client*	Server::getClientByFd(int fd)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd)
+		if ((*it)->getFd() == fd)
 		{
-			return &(*it);
+			return (*it);
 		}
 	}
 	return (NULL);
@@ -680,11 +680,12 @@ void	Server::removeChannel(const std::string &channelName)
 // remove the client from the client list
 void	Server::removeClient(int fd)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd)
+		if ((*it)->getFd() == fd)
 		{
-			close(it->getFd());
+			close(fd);
+			delete *it;
 			_clients.erase(it);
 			std::cout << "Client " << fd << " removed." << std::endl;
 			return ;
@@ -694,15 +695,15 @@ void	Server::removeClient(int fd)
 
 void	Server::closeClients()
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		close(it->getFd());
+		close((*it)->getFd());
 	}
 	_clients.clear();
 	std::cout << "ALl the remaining client Fds are closed." << std::endl;
 }
 
-const std::vector<Client>& Server::getClients() const
+const std::vector<Client*>& Server::getClients() const
 {
 	return (_clients);
 }
