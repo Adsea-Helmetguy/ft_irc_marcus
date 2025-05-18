@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 17:28:48 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 10:04:07 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -369,17 +369,20 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	Client *client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_list.size() != 2)
+
+	if (cmd_list.size() < 2 || cmd_list.size() > 3)
 	{
-		// need to change this?
-		send(fd, "ERROR :JOIN command requires exactly one argument\r\n", 50, 0);
+		send(fd, "ERROR :JOIN command requires 1 or 2 arguments\r\n", 47, 0);
 		return ;
 	}
 	// extract the channel name
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	const std::string channelName = *it;
-
+	//check if there is a password provided by user
+	const std::string password = "";
+	if (it != cmd_list.end())
+		password == *it;
 	// iterate over _channels to search if the channel already exist
 	Channel *channel = getChannelByName(channelName);
 
@@ -387,7 +390,7 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	if (!channel)
 	{
 		// create a new channel with the name given
-		_channels.push_back(Channel(channelName));
+		_channels.push_back(Channel(channelName, password));
 		// get a reference to the channel created
 		channel = &_channels.back();
 		// add the client as operator
@@ -398,9 +401,13 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 
 		std::string clientList = channel->getClientList();
 		// send all the message together to irssi
+		/**
+		 * Need to get the variables to avoid calling getters multiple times;
+		 */
 		sendReply(fd,
 		RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) +
 		RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()) +
+		RPL_CREATIONTIME(getName(), client->getNick(), channelName, channel->getCreationTime()) +
 		RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList) +
 		RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 		// broadcast the join mesasge to all others except user
@@ -412,6 +419,12 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
+			// check if there is password and if the password provided is the same
+			if (channel->hasPassword() && channel->getPassword() != password)
+			{
+				sendError(fd, "ERROR :Cannot join channel (+k) - bad key\r\n");
+				return;
+			}
 			channel->addMember(client);
 
 			std::cout << "[JOIN] " << client->getNick() << " joined " << channelName << "\n";
