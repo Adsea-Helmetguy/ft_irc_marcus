@@ -10,10 +10,10 @@
 2. /connect localhost port password
 
 **Joining a Channel**
-1. /join <#channelname>
+1. /join <#channelname> <password_optional>
 
 **Leaving a Channel**
-1. /part <#channelname> <optional reason>
+1. /part <#channelname>
 
 **Sending a message**
 2. just type message in the channel

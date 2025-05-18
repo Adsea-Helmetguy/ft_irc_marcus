@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/18 10:04:07 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 11:25:32 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,9 +380,9 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	++it;
 	const std::string channelName = *it;
 	//check if there is a password provided by user
-	const std::string password = "";
-	if (it != cmd_list.end())
-		password == *it;
+	std::string password = "";
+	if (++it != cmd_list.end())
+		password = *it;
 	// iterate over _channels to search if the channel already exist
 	Channel *channel = getChannelByName(channelName);
 
@@ -398,8 +398,10 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		// server displays message to show new channel is created
 		std::cout << "[INFO] New channel " << channelName
 				  << " created by " << client->getNick() << "\r\n";
-
+		std::cout << channelName << " is a password protected channel" << "\r\n";
 		std::string clientList = channel->getClientList();
+		std::cout << "printing client list" << std::endl;
+		std::cout << clientList << std::endl;
 		// send all the message together to irssi
 		/**
 		 * Need to get the variables to avoid calling getters multiple times;
@@ -422,8 +424,9 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			// check if there is password and if the password provided is the same
 			if (channel->hasPassword() && channel->getPassword() != password)
 			{
-				sendError(fd, "ERROR :Cannot join channel (+k) - bad key\r\n");
-				return;
+				std::cout << "Error: " << client->getNick() << " tried to join without a correct password" << std::endl;
+				sendError(fd, ERR_BADCHANNELKEY(getName(), client->getNick(), channelName));
+				return ;
 			}
 			channel->addMember(client);
 
@@ -431,13 +434,17 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			std::cout << "[USERS] " << channel->getClientList() << "\n";
 
 			std::string clientList = channel->getClientList();
-
+			std::cout << "printing client list" << std::endl;
+			std::cout << clientList << std::endl;
+			std::cout << "NAMEREPLY" << std::endl;
+			std::cout << RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList);
 			// send all the message together to irssi
 			sendReply(fd,
-			RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) +
-			RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()) +
-			RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList) +
-			RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
+				RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) +
+				RPL_TOPIC(getName(), client->getNick(), channelName, channel->getTopic()) +
+				//RPL_CREATIONTIME(getName(), client->getNick(), channelName, channel->getCreationTime()) +
+				RPL_NAMEREPLY(getName(), client->getNick(), channelName, clientList) +
+				RPL_ENDOFNAMES(getName(), client->getNick(), channelName));
 			std::cout << RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName) << std::endl;
 			// broadcast the join mesasge to all others except user
 			channel->broadcast(RPL_JOINMSG(client->getNick(), client->getUserName(), client->getHostName(), channelName), client);

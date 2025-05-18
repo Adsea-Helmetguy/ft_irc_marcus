@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 12:36:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/13 22:41:45 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 10:44:29 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,11 @@ std::string ERR_CANNOTSENDTOCHAN(const std::string &serverName, const std::strin
 std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
 {
 	return (":" + serverName + " 442 " + clientNick + " " + channelName + " :You're not on that channel" + CRLF);
+}
+
+
+// 475
+std::string ERR_BADCHANNELKEY(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName + " 475 " + clientNick + " " + channelName + " :Cannot join channel (+k) - bad key" + CRLF);
 }

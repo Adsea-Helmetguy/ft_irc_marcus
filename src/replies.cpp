@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 21:19:57 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/18 10:02:54 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 11:48:23 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ std::string RPL_TOPIC(const std::string &serverName, const std::string &clientNi
 // Builds 353 NAMEREPLY string
 std::string RPL_NAMEREPLY(const std::string &serverName, const std::string &clientNick, const std::string &channelName, std::string &clientList)
 {
-	return (":" + serverName + " 353 " + clientNick + " " + channelName + " :" + clientList + CRLF);
+	return (":" + serverName + " 353 " + clientNick + " = " + channelName + " :" + clientList + CRLF);
 }
 
 // Builds 366 Indicate all the users nick sent out

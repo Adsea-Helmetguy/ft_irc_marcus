@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/18 10:01:04 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 10:41:27 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Channel::Channel(const std::string &name, const std::string &password)
 {
 	_name = name;
+	_password = password;
 	_topic = "Welcome to " + getName();
 	_created_time = getFormattedTime();
 };
@@ -50,8 +51,8 @@ std::string Channel::getClientList()
 		else
 			clientList += _users[i].client->getNick();
 	}
-	std::cout << "Printing client list" << std::endl;
-	std::cout << clientList << std::endl;
+	//std::cout << "Printing client list" << std::endl;
+	//std::cout << clientList << std::endl;
 	return (clientList);
 }
 
