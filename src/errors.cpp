@@ -50,6 +50,11 @@ std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &c
 }
 
 
+//482 ERR_CHANOPRIVSNEEDED :You're not channel operator
+std::string ERR_CHANOPRIVSNEEDED(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName  + " 482 " + clientNick + " " + channelName + " :You're not channel operator" + CRLF);
+}
 // 475
 std::string ERR_BADCHANNELKEY(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
 {

@@ -452,6 +452,64 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	}
 }
 
+void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
+{
+	Client	*client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_lst.size() < 2)
+	{
+		sendError(fd, "ERROR :No enough arguments\r\n");
+		return;
+	}
+	std::list<std::string>::iterator	it = cmd_lst.begin();
+	++it;
+	//checks that you wrote '#' as well as channel name to it:
+	std::string	hash_and_channelName;
+
+	if (!(*it).empty())
+		hash_and_channelName = *it;
+	if (hash_and_channelName.empty() || hash_and_channelName[0] != '#')
+		return;
+	// It's a channel mode
+	std::cout << GREEN << "[DEBUG] It's a channel!!!" << RT << std::endl;
+	std::string	channelName = hash_and_channelName.substr(1); // remove leading '#'
+	Channel*	targetChannel = NULL;
+
+	//find the channel
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		if (_channels[i].getName() == channelName)
+		{
+			targetChannel = &_channels[i];
+			break;
+		}
+	}
+
+	std::cout << GREEN << "SUCCESS TILL HERE!" << RT << std::endl;
+	//checking If u are a member of that channel
+	if (!targetChannel)
+	{
+		sendReply(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
+		return;
+	}
+	else
+		sendReply(fd, ERR_CHANOPRIVSNEEDED(getName(), client->getNick(), targetChannel->getName()));
+
+	//Check membership and operator status
+	if (!targetChannel->isMember(client))
+	{
+		sendReply(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), targetChannel->getName()));
+		return;
+	}
+	if (!targetChannel->isOperator(client))
+	{
+		sendReply(fd, ERR_CHANOPRIVSNEEDED(getName(), client->getNick(), targetChannel->getName()));
+		return;
+	}
+	std::cout << GREEN << "FINISH!!! WELL DONE" << RT << std::endl;
+}
+
 void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
 {
 	if (cmd_lst.size() < 2)
@@ -638,7 +696,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 	else if (cmd == "CAP")
 		;
 	else if (cmd == "MODE")
-		;
+		handleMode(fd, cmd_lst);
 	else if (cmd == "PART")
 		handlePart(fd, cmd_lst);
 	else if (cmd == "PRIVMSG")
