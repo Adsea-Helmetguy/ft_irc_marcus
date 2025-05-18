@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 13:47:50 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 14:33:49 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 10:03:13 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ std::string RPL_YOURHOST(const std::string &serverName, const std::string &clien
 std::string RPL_CREATED(const std::string &serverName, const std::string &clientNick, const std::string &createdTime);
 // 004
 std::string RPL_MYINFO(const std::string &serverName, const std::string &clientNick);
+// 329
+std::string RPL_CREATIONTIME(const std::string &serverName, const std::string &clientNick, const std::string &channelName, const std::string &timestamp);
 // 375
 std::string RPL_MOTDSTART(const std::string &serverName, const std::string &clientNick);
 // 372

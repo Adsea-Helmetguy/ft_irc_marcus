@@ -6,15 +6,18 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 12:05:28 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 10:41:27 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/channel.hpp"
 
-Channel::Channel(const std::string &name): _name(name)
+Channel::Channel(const std::string &name, const std::string &password)
 {
+	_name = name;
+	_password = password;
 	_topic = "Welcome to " + getName();
+	_created_time = getFormattedTime();
 };
 
 const std::string &Channel::getName() const
@@ -48,15 +51,31 @@ std::string Channel::getClientList()
 		else
 			clientList += _users[i].client->getNick();
 	}
-	std::cout << "Printing client list" << std::endl;
-	std::cout << clientList << std::endl;
+	//std::cout << "Printing client list" << std::endl;
+	//std::cout << clientList << std::endl;
 	return (clientList);
+}
+
+const std::string &Channel::getPassword() const
+{
+	return (_password);
+}
+
+const std::string &Channel::getCreationTime() const
+{
+	return (_created_time);
 }
 
 void Channel::setName(const std::string &name)
 {
 	_name = name;
 }
+
+void Channel::setPassword(const std::string &password)
+{
+	_password = password;
+}
+
 
 bool Channel::isMember(Client *client)
 {
@@ -88,6 +107,12 @@ void Channel::addOperator(Client *client)
 {
 	_users.push_back(ChannelUser(client, true));
 }
+
+bool Channel::hasPassword() const
+{
+	return (!_password.empty());
+}
+
 
 void Channel::removeUser(Client *client)
 {

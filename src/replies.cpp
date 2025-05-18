@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 21:19:57 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 14:34:37 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/18 11:48:23 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,13 @@ std::string RPL_CREATED(const std::string &serverName, const std::string &client
 // Builds 004 string
 std::string RPL_MYINFO(const std::string &serverName, const std::string &clientNick)
 {
-	return (":" + serverName + " 004 " + clientNick + " " + serverName + " 1.0 o o" + CRLF);
+	return (":" + serverName + " 004 " + clientNick + " " + serverName + " 1.0 " + CRLF);
+}
+
+// 329 Channel Creation time
+std::string RPL_CREATIONTIME(const std::string &serverName, const std::string &clientNick, const std::string &channelName, const std::string &timestamp)
+{
+	return (":" + serverName + " 329 " + clientNick + " " + channelName + " " + timestamp + CRLF);
 }
 
 // Builds 375 string Start of Message of The Day
@@ -65,7 +71,7 @@ std::string RPL_TOPIC(const std::string &serverName, const std::string &clientNi
 // Builds 353 NAMEREPLY string
 std::string RPL_NAMEREPLY(const std::string &serverName, const std::string &clientNick, const std::string &channelName, std::string &clientList)
 {
-	return (":" + serverName + " 353 " + clientNick + " " + channelName + " :" + clientList + CRLF);
+	return (":" + serverName + " 353 " + clientNick + " = " + channelName + " :" + clientList + CRLF);
 }
 
 // Builds 366 Indicate all the users nick sent out

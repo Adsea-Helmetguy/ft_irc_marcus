@@ -20,9 +20,11 @@ class Channel
 		std::string 			_name;
 		std::vector<ChannelUser> _users;
 		std::string				_topic;
+		std::string				_password;
+		std::string				_created_time;
 
 	public:
-		Channel(const std::string &name);
+		Channel(const std::string &name, const std::string &password);
 		~Channel() {};
 
 		// getters
@@ -30,9 +32,11 @@ class Channel
 		const std::string &getTopic();
 		const std::vector<ChannelUser> &getUsers() const;
 		std::string getClientList();
+		const std::string &getPassword() const;
+		const std::string &getCreationTime() const;
 		// setters
 		void setName(const std::string &name);
-
+		void setPassword(const std::string &password);
 		// add members
 		bool isMember(Client *client);
 		void addMember(Client *client);
@@ -40,6 +44,7 @@ class Channel
 		void addOperator(Client *client);
 
 		bool isOperator(Client *client) const;
+		bool hasPassword() const;
 		void removeUser(Client *client);
 
 		void broadcast(const std::string &message, const Client *exclude);
