@@ -457,8 +457,9 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	Client	*client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_lst.size() < 2)
+	if (cmd_lst.size() != 3)
 	{
+		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
 		sendError(fd, "ERROR :No enough arguments\r\n");
 		return;
 	}
@@ -473,41 +474,44 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		return;
 	// It's a channel mode
 	std::cout << GREEN << "[DEBUG] It's a channel!!!" << RT << std::endl;
-	std::string	channelName = hash_and_channelName.substr(1); // remove leading '#'
-	Channel*	targetChannel = NULL;
+	Channel	*targetChannel = NULL;
 
 	//find the channel
 	for (size_t i = 0; i < _channels.size(); ++i)
 	{
-		if (_channels[i].getName() == channelName)
+		std::cout << "[DEBUG] Comparing _channel: " << GREEN << _channels[i].getName() << RT << std::endl;
+		if (_channels[i].getName() == hash_and_channelName)
 		{
 			targetChannel = &_channels[i];
+			std::cout << "[DEBUG] FOUND CHANNEL = " << GREEN << targetChannel->getName() << RT << std::endl;
 			break;
 		}
 	}
 
-	std::cout << GREEN << "SUCCESS TILL HERE!" << RT << std::endl;
-	//checking If u are a member of that channel
+	//checking if channel exists
 	if (!targetChannel)
 	{
-		sendReply(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), channelName));
+		std::cout << GREEN << "[DEBUG] No such channel friend." << RT << std::endl;
+		sendReply(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), hash_and_channelName));
 		return;
 	}
-	else
-		sendReply(fd, ERR_CHANOPRIVSNEEDED(getName(), client->getNick(), targetChannel->getName()));
 
-	//Check membership and operator status
+	//Checking the membership and operator status
 	if (!targetChannel->isMember(client))
 	{
+		std::cout << GREEN << "[DEBUG] Member is not in channel." << RT << std::endl;
 		sendReply(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), targetChannel->getName()));
 		return;
 	}
 	if (!targetChannel->isOperator(client))
 	{
+		std::cout << GREEN << "[DEBUG] U ain't the operator. GET OUTTA HERE!" << RT << std::endl;
 		sendReply(fd, ERR_CHANOPRIVSNEEDED(getName(), client->getNick(), targetChannel->getName()));
 		return;
 	}
-	std::cout << GREEN << "FINISH!!! WELL DONE" << RT << std::endl;
+
+	//checking the third argument now!
+	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
 }
 
 void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
