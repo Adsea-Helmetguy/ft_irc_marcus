@@ -30,3 +30,5 @@ std::string ERR_CANNOTSENDTOCHAN(const std::string &serverName, const std::strin
 std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
 // 475
 std::string ERR_BADCHANNELKEY(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
+// 482
+std::string ERR_CHANOPRIVSNEEDED(const std::string &serverName, const std::string &clientNick, const std::string &channelName);

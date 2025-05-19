@@ -55,3 +55,10 @@ std::string ERR_BADCHANNELKEY(const std::string &serverName, const std::string &
 {
 	return (":" + serverName + " 475 " + clientNick + " " + channelName + " :Cannot join channel (+k) - bad key" + CRLF);
 }
+
+// 482
+std::string ERR_CHANOPRIVSNEEDED(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName  + " 482 " + clientNick + " " + channelName + " :You're not channel operator" + CRLF);
+}
+

@@ -208,6 +208,71 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	}
 }
 
+//handles the "MODE" while in the channel
+void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
+{
+	Client	*client = getClientByFd(fd);
+	if (!client)
+		return ;
+	if (cmd_lst.size() != 3)
+	{
+		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
+		sendError(fd, "ERROR :No enough arguments\r\n");
+		return;
+	}
+	std::list<std::string>::iterator	it = cmd_lst.begin();
+	++it;
+
+	//checks that you wrote '#' as well as channel name to it:
+	std::string	hash_and_channelName = NULL;
+	if (!(*it).empty())
+		hash_and_channelName = *it;
+	if (hash_and_channelName.empty() || hash_and_channelName[0] != '#')
+	{
+		std::cout << GREEN << "[DEBUG] Dude you forgot to add \'#\'." << RT << std::endl;
+		return;
+	}
+
+	//find the channel
+	Channel	*targetChannel = NULL;
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		std::cout << "[DEBUG] Comparing _channel: " << GREEN << _channels[i].getName() << RT << std::endl;
+		if (_channels[i].getName() == hash_and_channelName)
+		{
+			targetChannel = &_channels[i];
+			std::cout << "[DEBUG] FOUND CHANNEL = " << GREEN << targetChannel->getName() << RT << std::endl;
+			break;
+		}
+	}
+
+	//checking if channel exists
+	if (!targetChannel)
+	{
+		std::cout << GREEN << "[DEBUG] No such channel friend." << RT << std::endl;
+		sendReply(fd, ERR_NOSUCHCHANNEL(getName(), client->getNick(), hash_and_channelName));
+		return;
+	}
+
+	//Checking the membership and operator status
+	if (!targetChannel->isMember(client))
+	{
+		std::cout << GREEN << "[DEBUG] Member is not in channel." << RT << std::endl;
+		sendReply(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), targetChannel->getName()));
+		return;
+	}
+
+	if (!targetChannel->isOperator(client))
+	{
+		std::cout << GREEN << "[DEBUG] U ain't the operator. GET OUTTA HERE!" << RT << std::endl;
+		sendReply(fd, ERR_CHANOPRIVSNEEDED(getName(), client->getNick(), targetChannel->getName()));
+		return;
+	}
+
+	//checking the third argument now!
+	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
+}
+
 void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
 {
 	if (cmd_lst.size() < 2)
