@@ -88,8 +88,8 @@ class Server
 		void		handleJoin(int fd, std::list<std::string> cmd_list);
 		void		handlePart(int fd, std::list<std::string> cmd_list);
 		void		handlePrivmsg(int fd, std::list<std::string> cmd_list);
-		void		handlePing(int fd, std::list<std::string> cmd_lst);
 		void		handleMode(int fd, std::list<std::string> cmd_lst);
+		void		handlePing(int fd, std::list<std::string> cmd_lst);
 
 		void		sendWelcome(Client *client);
 
