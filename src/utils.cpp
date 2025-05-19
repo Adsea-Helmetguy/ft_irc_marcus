@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 14:56:47 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 17:36:03 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/19 10:40:50 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,6 @@ void	sendError(int fd, const std::string &message)
 
 void	sendReply(int fd, const std::string &message)
 {
-	/** *
-	if (send(fd, message.c_str(), message.size(),0) == -1)
-		std::cerr << "Reply sent" << std::endl;
-	**/
 	ssize_t n = send(fd, message.c_str(), message.size(), 0);
 	if (n == -1)
 		perror("send");
@@ -132,16 +128,16 @@ int	setnonblocking(int client_fd)
 
 std::string sha256(const std::string &str)
 {
-    unsigned char hash[32];
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+	unsigned char hash[32];
+	EVP_MD_CTX* ctx = EVP_MD_CTX_new();
 
-    EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
-    EVP_DigestUpdate(ctx, str.c_str(), str.length());
-    EVP_DigestFinal_ex(ctx, hash, NULL);
-    EVP_MD_CTX_free(ctx);
+	EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
+	EVP_DigestUpdate(ctx, str.c_str(), str.length());
+	EVP_DigestFinal_ex(ctx, hash, NULL);
+	EVP_MD_CTX_free(ctx);
 
-    std::ostringstream oss;
-    for (int i = 0; i < 32; ++i)
-        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-    return oss.str();
+	std::ostringstream oss;
+	for (int i = 0; i < 32; ++i)
+		oss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+	return (oss.str());
 }

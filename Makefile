@@ -12,6 +12,7 @@ OBJ_DIR = obj
 SRCS = main.cpp \
 		utils.cpp \
 		server.cpp \
+		handle.cpp \
 		client.cpp \
 		replies.cpp \
 		errors.cpp \

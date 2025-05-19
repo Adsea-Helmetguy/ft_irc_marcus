@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/18 10:41:27 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/19 10:51:20 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,6 @@ const std::vector<ChannelUser> &Channel::getUsers() const
 	return (_users);
 }
 
-/**
- * This function works now
- */
 std::string Channel::getClientList()
 {
 	std::string clientList = "";
