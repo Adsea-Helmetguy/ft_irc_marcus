@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/16 14:28:40 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/19 10:59:49 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,3 @@ class Server
 		Channel*	getChannelByName(const std::string &channelName);
 		void		removeChannel(const std::string &channelName);
 };
-
-bool isValidPort(const char *portStr);
-void setupSignalHandler();

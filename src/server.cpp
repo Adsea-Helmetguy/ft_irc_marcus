@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/18 11:25:32 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/05/19 10:54:53 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,10 +217,6 @@ void	Server::handleIncomingNewClient()
 	// this adds the client into the clients list
 	_clients.push_back(newClient);
 
-	// set the client fd to non blocking
-	//int flags = fcntl(client_fd, F_GETFL, 0);
-	//fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
-
 	// this adds the client fd into epoll
 	struct epoll_event clientEvent;
 	clientEvent.events = EPOLLIN;
@@ -233,72 +229,6 @@ void	Server::handleIncomingNewClient()
 	}
 }
 
-/**
- * handles the client's password and checks if it matches with the server.
- */
-void Server::handlePass(int fd, std::list<std::string> cmd_list)
-{
-	Client *client = getClientByFd(fd);
-	if (!client)
-		return ;
-	if (cmd_list.size() != 2)
-	{
-		// need to change this?
-		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
-		return ;
-	}
-	// iterate to the second item in the list
-	std::list<std::string>::const_iterator it = cmd_list.begin();
-	++it;
-	const std::string &provided = *it;
-	if (_password == sha256(provided))
-	{
-		client->authenticate();
-		send(fd, "NOTICE AUTH :Password accepted\r\n", 33, 0);
-		std::cout << "Client " << fd << " : has been authenticated.\n";
-	}
-	else
-		send(fd, "ERROR :Invalid password\r\n", 26, 0);
-}
-
-void Server::handleNick(int fd, std::list<std::string> cmd_list)
-{
-	Client *client = getClientByFd(fd);
-	if (!client)
-		return ;
-	if (cmd_list.size() != 2)
-	{
-		// I need to change this
-		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
-		return ;
-	}
-	// check if user has authenticated.
-	if (!client->is_authenticated())
-	{
-		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
-		sendError(fd, errorMsg);
-		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\r\n";
-		return ;
-	}
-	// iterate to the second item in the list
-	// /NICK nickname
-	std::list<std::string>::const_iterator it = cmd_list.begin();
-	++it;
-	std::string newNick = *it;
-	// check if the nickname has a max of 9 characters
-
-	if (newNick.length() > 9)
-	{
-		sendError(fd, "ERROR :Nickname too long\r\n");
-		return;
-	}
-	std::string oldNick = client->getNick();
-	client->set_nick(newNick);
-	std::cout << "[NICK] " << oldNick << " changed to " << newNick << std::endl;
-	std::string nickReply = ":" + oldNick + "!" + client->getUserName() + "@" +
-	client->getHostName() + " NICK :" + newNick + CRLF;
-	sendReply(fd, nickReply);
-}
 
 void Server::sendWelcome(Client *client)
 {
@@ -678,13 +608,11 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 	}
 }
 
-
-
 void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 {
 	Client* client = getClientByFd(fd);
 	const std::string &cmd = cmd_lst.front();
-	//const std::string &errorMsg = "ERROR :Unknown command\r\n";
+
 	if (cmd == "PASS")
 		// authenticate the user
 		handlePass(fd, cmd_lst);
