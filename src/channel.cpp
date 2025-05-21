@@ -149,3 +149,27 @@ void Channel::broadcast(const std::string &message)
 		sendReply(it->client->getFd(), message);
 	}
 }
+
+
+//for mode -marcus-
+/*
+void Channel::setModeAtindex(size_t index, bool mode)
+{
+	this->_modes[index].second = mode;
+}
+
+bool Channel::getModeAtindex(size_t index)
+{
+	return (this->_modes[index].second);
+}
+*/
+void Channel::SetInviteOnly(bool enable_invite)
+{
+	this->_inviteOnly = enable_invite;
+}
+
+bool	Channel::channelIsInviteOnly()
+{
+	return (this->_inviteOnly);
+}
+//for mode -marcus-

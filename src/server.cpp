@@ -375,10 +375,44 @@ void	Server::closeClients()
 		close((*it)->getFd());
 	}
 	_clients.clear();
-	std::cout << "ALl the remaining client Fds are closed." << std::endl;
+	std::cout << "ALL the remaining client Fds are closed." << std::endl;
 }
 
 const std::vector<Client*>& Server::getClients() const
 {
 	return (_clients);
 }
+
+//Marcus functions
+std::string	Server::modeTo_execute(char opera, char mode, std::string modeCommand)
+{
+	std::stringstream ss;
+	ss.clear();
+
+	//After research, Once it touches the char, takes the one before
+	//e.g /mode #room1 +++-i++i, (-i) wins.
+	(void)modeCommand;
+	if (opera && mode)
+		ss << opera << mode;
+	return (ss.str());
+}
+
+std::string	Server::invite_only(Channel *targetChannel, char operation, std::string modeCommand)
+{
+	std::string	param;
+	param.clear();
+	if (operation == '+')
+	{
+		//targetChannel->setModeAtindex(0, true);
+		targetChannel->SetInviteOnly(true);//set the channel as invite only
+		param = modeTo_execute(operation, 'i', modeCommand);
+	}
+	else if (operation == '-')
+	{
+		//targetChannel->setModeAtindex(0, false);
+		targetChannel->SetInviteOnly(0);
+		param = modeTo_execute(operation, 'i', modeCommand);
+	}
+	return (param);
+}
+//Marcus functions

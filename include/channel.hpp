@@ -17,11 +17,13 @@ struct ChannelUser
 class Channel
 {
 	private:
-		std::string 			_name;
-		std::vector<ChannelUser> _users;
-		std::string				_topic;
-		std::string				_password;
-		std::string				_created_time;
+		std::string 				_name;
+		std::vector<ChannelUser>	_users;
+		std::string					_topic;
+		std::string					_password;
+		std::string					_created_time;
+		bool						_inviteOnly;// -marcus-
+		//std::vector<std::pair<char, bool> > _current_mode;// -marcus- '>' got a space to prevent ">>" usage, c++98 issue only
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -49,5 +51,12 @@ class Channel
 
 		void broadcast(const std::string &message, const Client *exclude);
 		void broadcast(const std::string &message);
+
+		//for mode -marcus-:
+		void	setModeAtindex(size_t index, bool mode);
+		void	SetInviteOnly(bool enable_invite);
+		bool	channelIsInviteOnly();
+		bool	getModeAtindex(size_t index);
+		//std::string setInviteOnly(bool enable);
 
 };
