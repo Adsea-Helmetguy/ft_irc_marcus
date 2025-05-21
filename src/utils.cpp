@@ -54,14 +54,15 @@ std::list<std::string> splitString(std::string &cmd)
 	{
 		std::cout << YELLOW << "LOOP-> " << loop
 			<< " | Token = " << RT << token << std::endl;
-		if (loop >= 5)
-		{
-			name += token + " ";
-			continue;
-		}
+		//if (loop >= 5)
+		//{
+		//	name += token + " ";
+		//	continue;
+		//}
 		lst.push_back(token);
 		token.clear();
 	}
+/*
 	if (!name.empty() && name[name.size() - 1] == ' ')
 	{
 		name.erase((name.size() - 1), 1);
@@ -69,6 +70,7 @@ std::list<std::string> splitString(std::string &cmd)
 			<< name << RT << "\"" << std::endl;
 		lst.push_back(name);
 	}
+*/
 	return (lst);
 }
 

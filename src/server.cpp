@@ -266,7 +266,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 	else if (cmd == "CAP")
 		;
 	else if (cmd == "MODE")
-		;
+		handleMode(fd, cmd_lst);
 	else if (cmd == "PART")
 		handlePart(fd, cmd_lst);
 	else if (cmd == "PRIVMSG")

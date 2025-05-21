@@ -85,7 +85,7 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 	Client *client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_list.size() != 5)
+	if (cmd_list.size() < 5)
 	{
 		const std::string &errorMsg = "ERROR :USER command requires three argument\r\n";
 		sendError(fd, errorMsg);
@@ -214,24 +214,22 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	Client	*client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_lst.size() == 3)
+	if (cmd_lst.size() != 3)
 	{
 		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
-		sendError(fd, "ERROR :No enough arguments\r\n");
 		return;
 	}
+
 	std::list<std::string>::iterator	it = cmd_lst.begin();
 	++it;
 
 	//checks that you wrote '#' as well as channel name to it:
-	std::string	hash_and_channelName = NULL;
+	std::string	hash_and_channelName;
+	hash_and_channelName.clear();
 	if (!(*it).empty())
 		hash_and_channelName = *it;
 	if (hash_and_channelName.empty() || hash_and_channelName[0] != '#')
-	{
-		std::cout << GREEN << "[DEBUG] Dude you forgot to add \'#\'." << RT << std::endl;
 		return;
-	}
 
 	//find the channel
 	Channel	*targetChannel = NULL;
