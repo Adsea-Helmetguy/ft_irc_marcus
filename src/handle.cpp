@@ -279,8 +279,8 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	}
 
 	char	operation = '\0';
-	//std::stringstream	mode_chain;
-	//mode_chain.clear();
+	std::stringstream	mode_chain;
+	mode_chain.clear();
 
 	std::cout << YELLOW << "[DEBUG] IF THE VALUE OF operation is = " << operation << RT << std::endl;
 	for (size_t i = 0; i < modeCommand.size(); i++)
@@ -293,11 +293,12 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		}
 		if (i != 0 && modeCommand[i] && operation)
 		{
-			std::cout << YELLOW << "[DEBUG] operation = " << operation << "Value of this = " << modeCommand[i] 
-				<< RT << std::endl;
+			std::cout << YELLOW << "[DEBUG] (operation = \"" RT << operation << YELLOW 
+				<< "\" | Value of this = \"" << RT << modeCommand[i] 
+				<< YELLOW << "\")" << RT << std::endl;
 			// [i] invite
-			//if (modeCommand[i] == 'i')
-			//	mode_chain << invite_only(targetChannel , operation, modeCommand[i]);
+			if (modeCommand[i] == 'i')
+				mode_chain << invite_only(targetChannel , operation, fd);
 			//else if (modeCommand[i] == 't') //topic restriction mode
 				//mode_chain << topic_restriction(channel, opera, mode_chain.str());
 			// [t] set/remove restrictions to channel operators

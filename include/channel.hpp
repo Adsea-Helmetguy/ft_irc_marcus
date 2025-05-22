@@ -23,7 +23,7 @@ class Channel
 		std::string					_password;
 		std::string					_created_time;
 		bool						_inviteOnly;// -marcus-
-		//std::vector<std::pair<char, bool> > _current_mode;// -marcus- '>' got a space to prevent ">>" usage, c++98 issue only
+		std::vector<int>			_inviteList;// -marcus- 
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -52,11 +52,14 @@ class Channel
 		void broadcast(const std::string &message, const Client *exclude);
 		void broadcast(const std::string &message);
 
-		//for mode -marcus-:
-		void	setModeAtindex(size_t index, bool mode);
-		void	SetInviteOnly(bool enable_invite);
-		bool	channelIsInviteOnly();
-		bool	getModeAtindex(size_t index);
-		//std::string setInviteOnly(bool enable);
 
+		//for mode -marcus-:
+		void	SetInviteOnly(bool enable_invite);
+		bool	getchannelIsInviteOnly();
+			// Invite list methods
+			void	inviteClient(int clientFd);
+			bool	getisClientInvited(int clientFd) const;
+			void	removeInvite(int clientFd);
+			void	clearInviteList(); // Optional, maybe on mode -i
+		//for mode -marcus-:
 };

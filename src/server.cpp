@@ -384,34 +384,38 @@ const std::vector<Client*>& Server::getClients() const
 }
 
 //Marcus functions
-std::string	Server::modeTo_execute(char opera, char mode, std::string modeCommand)
+std::string	Server::modeTo_execute(char opera, char mode)
 {
 	std::stringstream ss;
 	ss.clear();
 
-	//After research, Once it touches the char, takes the one before
-	//e.g /mode #room1 +++-i++i, (-i) wins.
-	(void)modeCommand;
 	if (opera && mode)
 		ss << opera << mode;
 	return (ss.str());
 }
 
-std::string	Server::invite_only(Channel *targetChannel, char operation, std::string modeCommand)
+//edit int fd to get client's name instead
+std::string	Server::invite_only(Channel *targetChannel, char operation, int fd)
 {
 	std::string	param;
 	param.clear();
+	(void)fd;
+	//Client* client = getClientByFd(fd);
+	//having issues trying to get client's name and sending reply:
+	//sendreply not appearing in my channel
 	if (operation == '+')
 	{
 		//targetChannel->setModeAtindex(0, true);
 		targetChannel->SetInviteOnly(true);//set the channel as invite only
-		param = modeTo_execute(operation, 'i', modeCommand);
+		param = modeTo_execute(operation, 'i');
+		//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
 	}
 	else if (operation == '-')
 	{
 		//targetChannel->setModeAtindex(0, false);
-		targetChannel->SetInviteOnly(0);
-		param = modeTo_execute(operation, 'i', modeCommand);
+		targetChannel->SetInviteOnly(false);
+		param = modeTo_execute(operation, 'i');
+		//sendReply(fd, "mode/" + targetChannel->getName() + " [-i] by client " + client->getNick());
 	}
 	return (param);
 }
