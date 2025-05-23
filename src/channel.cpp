@@ -161,14 +161,14 @@ void Channel::SetInviteOnly(bool enable_invite)
 		if (this->_inviteList.empty())
 		{
 			std::cout << GREEN << "[SUCCESS] List is cleared!" << RT << std::endl;
-			return ;
 		}
-		std::cout << RED << "[DEBUG] Failed to clear list? WHY?" << RT << std::endl;
+		else
+			std::cout << RED << "[DEBUG] Failed to clear list? WHY?" << RT << std::endl;
 	}
 	this->_inviteOnly = enable_invite;
 }
 
-bool	Channel::getchannelIsInviteOnly()
+bool	Channel::getchannelIsInviteOnly() const
 {
 	return (this->_inviteOnly);
 }
@@ -184,7 +184,7 @@ bool	Channel::getisClientInvited(int clientFd) const
 	return (std::find(_inviteList.begin(), _inviteList.end(), clientFd) != _inviteList.end());
 }
 
-//once you joined after invite you can't join back unless invited again
+// once you joined after invite you can't join back unless invited again
 void	Channel::removeInvite(int clientFd)
 {
 	std::vector<int>::iterator it = std::find(_inviteList.begin(), _inviteList.end(), clientFd);

@@ -181,6 +181,18 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
+			// check if the person channel is invite only and if the person is in _invitelist
+			if (channel->getchannelIsInviteOnly() == true)
+			{
+				std::cout << RED << "[DEBUG] I am channel is invite only!" << RT << std::endl;
+				if (channel->getisClientInvited(fd) == false)
+				{
+					std::cout << RED << "Error: " << userNick 
+						<< " tried to join but was not invited" << RT << std::endl;
+					sendError(fd, ERR_INVITEONLYCHAN(serverName, userNick, channelName));
+					return ;
+				}
+			}
 			// check if there is password and if the password provided is the same
 			if (channel->hasPassword() && channel->getPassword() != password)
 			{
@@ -309,10 +321,15 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 			// [l] Set/remove the user limit to channel
 		}
 	}
-	//std::string chain = mode_chain.str();
-	//if (chain.empty())
-	//	return;
+	std::string chain = mode_chain.str();
+	if (chain.empty())
+		return;
+
  	//targetChannel->sendTo_all(RPL_CHANGEMODE(cli->getHostname(), channel->GetName(), mode_chain.str(), arguments));
+	if (targetChannel->getchannelIsInviteOnly() == true)
+		std::cout << GREEN << "[DEBUG] Channel is invite only now." << RT << std::endl;
+	std::cout << YELLOW << "[DEBUG] Current value of channel-> \"" << RED 
+		<< targetChannel->getchannelIsInviteOnly() << RT << "\"" << std::endl;
 	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
 }
 

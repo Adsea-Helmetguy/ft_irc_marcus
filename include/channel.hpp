@@ -55,7 +55,7 @@ class Channel
 
 		//for mode -marcus-:
 		void	SetInviteOnly(bool enable_invite);
-		bool	getchannelIsInviteOnly();
+		bool	getchannelIsInviteOnly() const;
 			// Invite list methods
 			void	inviteClient(int clientFd);
 			bool	getisClientInvited(int clientFd) const;
