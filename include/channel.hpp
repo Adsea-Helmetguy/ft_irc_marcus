@@ -17,11 +17,13 @@ struct ChannelUser
 class Channel
 {
 	private:
-		std::string 			_name;
-		std::vector<ChannelUser> _users;
-		std::string				_topic;
-		std::string				_password;
-		std::string				_created_time;
+		std::string 				_name;
+		std::vector<ChannelUser>	_users;
+		std::string					_topic;
+		std::string					_password;
+		std::string					_created_time;
+		bool						_inviteOnly;// -marcus-
+		std::vector<int>			_inviteList;// -marcus- 
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -50,4 +52,14 @@ class Channel
 		void broadcast(const std::string &message, const Client *exclude);
 		void broadcast(const std::string &message);
 
+
+		//for mode -marcus-:
+		void	SetInviteOnly(bool enable_invite);
+		bool	getchannelIsInviteOnly();
+			// Invite list methods
+			void	inviteClient(int clientFd);
+			bool	getisClientInvited(int clientFd) const;
+			void	removeInvite(int clientFd);
+			void	clearInviteList(); // Optional, maybe on mode -i
+		//for mode -marcus-:
 };

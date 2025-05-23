@@ -266,7 +266,7 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 	else if (cmd == "CAP")
 		;
 	else if (cmd == "MODE")
-		;
+		handleMode(fd, cmd_lst);
 	else if (cmd == "PART")
 		handlePart(fd, cmd_lst);
 	else if (cmd == "PRIVMSG")
@@ -375,10 +375,48 @@ void	Server::closeClients()
 		close((*it)->getFd());
 	}
 	_clients.clear();
-	std::cout << "ALl the remaining client Fds are closed." << std::endl;
+	std::cout << "ALL the remaining client Fds are closed." << std::endl;
 }
 
 const std::vector<Client*>& Server::getClients() const
 {
 	return (_clients);
 }
+
+//Marcus functions
+std::string	Server::modeTo_execute(char opera, char mode)
+{
+	std::stringstream ss;
+	ss.clear();
+
+	if (opera && mode)
+		ss << opera << mode;
+	return (ss.str());
+}
+
+//edit int fd to get client's name instead
+std::string	Server::invite_only(Channel *targetChannel, char operation, int fd)
+{
+	std::string	param;
+	param.clear();
+	(void)fd;
+	//Client* client = getClientByFd(fd);
+	//having issues trying to get client's name and sending reply:
+	//sendreply not appearing in my channel
+	if (operation == '+')
+	{
+		//targetChannel->setModeAtindex(0, true);
+		targetChannel->SetInviteOnly(true);//set the channel as invite only
+		param = modeTo_execute(operation, 'i');
+		//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
+	}
+	else if (operation == '-')
+	{
+		//targetChannel->setModeAtindex(0, false);
+		targetChannel->SetInviteOnly(false);
+		param = modeTo_execute(operation, 'i');
+		//sendReply(fd, "mode/" + targetChannel->getName() + " [-i] by client " + client->getNick());
+	}
+	return (param);
+}
+//Marcus functions

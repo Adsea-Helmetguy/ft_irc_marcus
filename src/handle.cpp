@@ -85,7 +85,7 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 	Client *client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_list.size() != 5)
+	if (cmd_list.size() < 5)
 	{
 		const std::string &errorMsg = "ERROR :USER command requires three argument\r\n";
 		sendError(fd, errorMsg);
@@ -217,21 +217,19 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	if (cmd_lst.size() != 3)
 	{
 		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
-		sendError(fd, "ERROR :No enough arguments\r\n");
 		return;
 	}
+
 	std::list<std::string>::iterator	it = cmd_lst.begin();
 	++it;
 
 	//checks that you wrote '#' as well as channel name to it:
-	std::string	hash_and_channelName = NULL;
+	std::string	hash_and_channelName;
+	hash_and_channelName.clear();
 	if (!(*it).empty())
 		hash_and_channelName = *it;
 	if (hash_and_channelName.empty() || hash_and_channelName[0] != '#')
-	{
-		std::cout << GREEN << "[DEBUG] Dude you forgot to add \'#\'." << RT << std::endl;
 		return;
-	}
 
 	//find the channel
 	Channel	*targetChannel = NULL;
@@ -261,7 +259,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		sendReply(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), targetChannel->getName()));
 		return;
 	}
-
 	if (!targetChannel->isOperator(client))
 	{
 		std::cout << GREEN << "[DEBUG] U ain't the operator. GET OUTTA HERE!" << RT << std::endl;
@@ -269,7 +266,53 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		return;
 	}
 
-	//checking the third argument now!
+	++it;
+	//checking the third argument requirements
+	std::string	modeCommand;
+	if (!(*it).empty())
+		modeCommand = *it;
+	if (modeCommand.empty() && modeCommand.size() != 2)
+	{
+		//command for mode must be "+i" or "-i"
+		std::cout << RED << "[DEBUG] Your Command for mode is not enough or empty." << RT << std::endl;
+		return;
+	}
+
+	char	operation = '\0';
+	std::stringstream	mode_chain;
+	mode_chain.clear();
+
+	std::cout << YELLOW << "[DEBUG] IF THE VALUE OF operation is = " << operation << RT << std::endl;
+	for (size_t i = 0; i < modeCommand.size(); i++)
+	{
+		if (!modeCommand.empty() && (modeCommand[i] == '+' || modeCommand[i] == '-'))
+		{
+			//this is in case the first array, modeCommand[1] on onwards still has "+/-"
+			operation = modeCommand[i];
+			continue ;
+		}
+		if (i != 0 && modeCommand[i] && operation)
+		{
+			std::cout << YELLOW << "[DEBUG] (operation = \"" RT << operation << YELLOW 
+				<< "\" | Value of this = \"" << RT << modeCommand[i] 
+				<< YELLOW << "\")" << RT << std::endl;
+			// [i] invite
+			if (modeCommand[i] == 'i')
+				mode_chain << invite_only(targetChannel , operation, fd);
+			//else if (modeCommand[i] == 't') //topic restriction mode
+				//mode_chain << topic_restriction(channel, opera, mode_chain.str());
+			// [t] set/remove restrictions to channel operators
+				//Find out how are operator privileges given to anyone 
+				//in the server, how is it done here?
+			// [k] set/remove channel key(password)
+			// [o] Give/take Channel operator privilege
+			// [l] Set/remove the user limit to channel
+		}
+	}
+	//std::string chain = mode_chain.str();
+	//if (chain.empty())
+	//	return;
+ 	//targetChannel->sendTo_all(RPL_CHANGEMODE(cli->getHostname(), channel->GetName(), mode_chain.str(), arguments));
 	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
 }
 

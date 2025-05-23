@@ -102,4 +102,8 @@ class Server
 		// channel
 		Channel*	getChannelByName(const std::string &channelName);
 		void		removeChannel(const std::string &channelName);
+
+		//mode -marcus-
+		std::string	modeTo_execute(char opera, char mode);
+		std::string	invite_only(Channel *targetChannel, char operation, int fd);
 };
