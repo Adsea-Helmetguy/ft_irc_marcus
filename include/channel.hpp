@@ -66,7 +66,12 @@ class Channel
 			void	setTopicRestriction(bool setTopic, int fd);
 			bool	getisTopicRestricted() const;
 			// PASSWORD (k)
+			void		setchannelPassword(std::string password, int fd);
+			void		removechannelPassword(int fd);
+			std::string	getchannelPassword() const;
 			// OPERATOR PRIVILEGE (o)
+
 			// USER LIMIT (l)
+			
 		//for mode -marcus-:
 };

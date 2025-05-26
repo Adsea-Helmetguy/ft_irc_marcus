@@ -62,10 +62,33 @@ void	Channel::setTopicRestriction(bool setTopic, int fd)
 {
 	(void)fd;
 	this->_topicRestricted = setTopic;
-	//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
+	//sendReply(fd, "mode/" + targetChannel->getName() + " [+t/-t] by client " + client->getNick());
 }
 
 bool	Channel::getisTopicRestricted() const
 {
 	return (this->_topicRestricted);
+}
+
+
+//|--------------------------------------|
+//|            -PASSWORD-                |
+//|--------------------------------------|
+void	Channel::setchannelPassword(std::string password, int fd)
+{
+	(void)fd;
+	this->_password = password;
+	//sendReply(fd, "mode/" + this->getName() + " [+k] by client " + client->getNick());
+}
+
+void	Channel::removechannelPassword(int fd)
+{
+	(void)fd;
+	this->_password.clear();
+	//sendReply(fd, "mode/" + this->getName() + " [-k] by client " + client->getNick());
+}
+
+std::string	Channel::getchannelPassword() const
+{
+	return (this->_password);
 }

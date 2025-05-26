@@ -432,4 +432,32 @@ std::string	Server::topic_restriction(Channel *targetChannel, char operation, in
 		<< targetChannel->getTopic() << RT << "\"" << std::endl;
 	return (param);
 }
+
+std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator it)
+{
+	std::string	param;
+	param.clear();
+	(void)fd;
+
+	++it;
+	std::cout << YELLOW << "Inside channel_password" << RT << std::endl;
+	if (!(*it).empty())
+	{
+		if (operation == '+')
+			targetChannel->setchannelPassword(*it, fd);
+		else if (operation == '-')
+			targetChannel->removechannelPassword(fd);
+
+		param = modeTo_execute(operation, 'k');
+		if (!targetChannel->getchannelPassword().empty())
+		{
+			std::cout << GREEN << "[DEBUG] Channel has a password." << RT << std::endl;
+			std::cout << YELLOW << "[DEBUG] Password-> \"" << RED 
+				<< targetChannel->getchannelPassword() << RT << "\"" << std::endl;
+		}
+		else
+			std::cout << RED << "[DEBUG] Password unavailable." << RT << std::endl;
+	}
+	return (param);
+}
 //Marcus functions

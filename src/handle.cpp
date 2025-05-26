@@ -282,8 +282,11 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	//checking the third argument requirements
 	std::string	modeCommand;
 	if (!(*it).empty())
+	{
 		modeCommand = *it;
-	if (modeCommand.empty() && modeCommand.size() != 2)
+		std::cout << YELLOW << "VALUE OF MODECOMMAND = " << RT << modeCommand << std::endl;
+	}
+	if (modeCommand.empty() && modeCommand.size() < 2)
 	{
 		//command for mode must be "+i" or "-i"
 		std::cout << RED << "[DEBUG] Your Command for mode is not enough or empty." << RT << std::endl;
@@ -308,15 +311,12 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 			std::cout << YELLOW << "[DEBUG] (operation = \"" RT << operation << YELLOW 
 				<< "\" | Value of this = \"" << RT << modeCommand[i] 
 				<< YELLOW << "\")" << RT << std::endl;
-			// [i] invite
 			if (modeCommand[i] == 'i')
 				mode_chain << invite_only(targetChannel , operation, fd);
-			else if (modeCommand[i] == 't') //topic restriction mode
+			else if (modeCommand[i] == 't')
 				mode_chain << topic_restriction(targetChannel, operation, fd);
-			// [t] set/remove restrictions to channel operators
-				//Find out how are operator privileges given to anyone 
-				//in the server, how is it done here?
-			// [k] set/remove channel key(password)
+			//else if (modeCommand[i] == 'k')
+			//	mode_chain << channel_password(targetChannel, operation, fd, it);
 			// [o] Give/take Channel operator privilege
 			// [l] Set/remove the user limit to channel
 		}
