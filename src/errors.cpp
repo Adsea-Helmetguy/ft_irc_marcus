@@ -42,6 +42,11 @@ std::string ERR_CANNOTSENDTOCHAN(const std::string &serverName, const std::strin
 	return (":" + serverName  + " 404 " + clientNick + " " + channelName + " :Cannot send to channel" + CRLF);
 }
 
+// 441
+std::string ERR_USERNOTINCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName + " 441 " + clientNick + " " + channelName + " :They aren't on that channel" + CRLF);
+}
 
 // 442
 std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)

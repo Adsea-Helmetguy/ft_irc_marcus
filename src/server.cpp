@@ -433,13 +433,12 @@ std::string	Server::topic_restriction(Channel *targetChannel, char operation, in
 	return (param);
 }
 
-std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator it)
+std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it)
 {
 	std::string	param;
 	param.clear();
 	(void)fd;
 
-	++it;
 	std::cout << YELLOW << "Inside channel_password" << RT << std::endl;
 	if (!(*it).empty())
 	{
@@ -458,6 +457,37 @@ std::string	Server::channel_password(Channel *targetChannel, char operation, int
 		else
 			std::cout << RED << "[DEBUG] Password unavailable." << RT << std::endl;
 	}
+	return (param);
+}
+
+//add the client's fd to the operatorlist
+std::string	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+{
+	std::string	param;
+	param.clear();
+	
+	std::cout << YELLOW << "Inside operator_addon" << RT << std::endl;
+	if (operation == '+')
+		targetChannel->OperatorTrue(it);
+	else if (operation == '-')
+		targetChannel->OperatorFalse(it);
+
+	param = modeTo_execute(operation, 'o');
+	return (param);
+}
+
+std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+{
+	std::string	param;
+	param.clear();
+	
+	std::cout << YELLOW << "Inside user_limit" << RT << std::endl;
+	if (operation == '+')
+		targetChannel->limitset(it);
+	else if (operation == '-')
+		targetChannel->limitunset(it);
+
+	param = modeTo_execute(operation, 'l');
 	return (param);
 }
 //Marcus functions

@@ -84,7 +84,8 @@ void	Channel::setchannelPassword(std::string password, int fd)
 void	Channel::removechannelPassword(int fd)
 {
 	(void)fd;
-	this->_password.clear();
+	if (!this->_password.empty())
+		this->_password.clear();
 	//sendReply(fd, "mode/" + this->getName() + " [-k] by client " + client->getNick());
 }
 
@@ -92,3 +93,70 @@ std::string	Channel::getchannelPassword() const
 {
 	return (this->_password);
 }
+
+//|--------------------------------------|
+//|            -OPERATOR-                |
+//|--------------------------------------|
+void	Channel::OperatorTrue(std::list<std::string>::iterator &it)
+{
+	std::cout << RED << "VALUE OF IT = \"" << RT << *it << RED << "\"" << RT << std::endl;
+	for (size_t i = 0; i < _users.size(); ++i)
+	{
+		if (this->_users[i].client->getNick() == *it)
+		{
+			this->_users[i].isOperator = true;
+			std::cout << "Operator \"" << this->getUserOperator_status(this->_users[i]) 
+					<< "\"" << RT << std::endl;
+			return;
+		}
+	}
+	std::cout << RED << "Dude can't be found here." << RT << std::endl;
+	//reply guide ask for help
+	//ERR_USERNOTINCHANNEL
+}
+
+void	Channel::OperatorFalse(std::list<std::string>::iterator &it)
+{
+	std::cout << RED << "VALUE OF IT = \"" << RT << *it << RED << "\"" << RT << std::endl;
+	for (size_t i = 0; i < _users.size(); ++i)
+	{
+		if (this->_users[i].client->getNick() == *it)
+		{
+			this->_users[i].isOperator = false;
+
+			std::cout << "Operator \"" << this->getUserOperator_status(this->_users[i]) 
+					<< "\"" << RT << std::endl;
+			return;
+		}
+	}
+	std::cout << RED << "Dude can't be found here." << RT << std::endl;
+	//reply guide ask for help
+	//ERR_USERNOTINCHANNEL
+}
+
+bool	Channel::getUserOperator_status(const ChannelUser user)
+{
+	for (size_t i = 0; i < this->_users.size(); ++i)
+	{
+		if (this->_users[i].client->getUserName() == user.client->getUserName())
+			return (this->_users[i].isOperator);
+	}
+	return (user.isOperator);
+}
+
+bool	Channel::isOperator(Client *client) const
+{
+	for (size_t i = 0; i < this->_users.size(); ++i)
+	{
+		if (this->_users[i].client == client && this->_users[i].isOperator)
+			return (true);
+	}
+	return (false);
+}
+
+
+//|--------------------------------------|
+//|           -USER LIMIT-               |
+//|--------------------------------------|
+
+

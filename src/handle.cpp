@@ -226,15 +226,16 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	Client	*client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_lst.size() != 3)
+	if (cmd_lst.size() < 3)
 	{
 		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
 		return;
 	}
 
+	std::cout << RED << "cmd_list size-> " << YELLOW << cmd_lst.size() << RT << std::endl;
 	std::list<std::string>::iterator	it = cmd_lst.begin();
-	++it;
-
+	if (++it == cmd_lst.end())
+		return;
 	//checks that you wrote '#' as well as channel name to it:
 	std::string	hash_and_channelName;
 	hash_and_channelName.clear();
@@ -278,7 +279,8 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		return;
 	}
 
-	++it;
+	if (++it == cmd_lst.end())
+		return;
 	//checking the third argument requirements
 	std::string	modeCommand;
 	if (!(*it).empty())
@@ -286,7 +288,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		modeCommand = *it;
 		std::cout << YELLOW << "VALUE OF MODECOMMAND = " << RT << modeCommand << std::endl;
 	}
-	if (modeCommand.empty() && modeCommand.size() < 2)
+	if (modeCommand.empty() || modeCommand.size() < 2)
 	{
 		//command for mode must be "+i" or "-i"
 		std::cout << RED << "[DEBUG] Your Command for mode is not enough or empty." << RT << std::endl;
@@ -298,7 +300,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	mode_chain.clear();
 
 	std::cout << YELLOW << "[DEBUG] IF THE VALUE OF operation is = " << operation << RT << std::endl;
-	for (size_t i = 0; i < modeCommand.size(); i++)
+	for (size_t i = 0; i < 2; i++)
 	{
 		if (!modeCommand.empty() && (modeCommand[i] == '+' || modeCommand[i] == '-'))
 		{
@@ -311,14 +313,26 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 			std::cout << YELLOW << "[DEBUG] (operation = \"" RT << operation << YELLOW 
 				<< "\" | Value of this = \"" << RT << modeCommand[i] 
 				<< YELLOW << "\")" << RT << std::endl;
-			if (modeCommand[i] == 'i')
+			std::cout << RED << "modeCommand.size() = " << RT << modeCommand.size() << std::endl;
+			if (modeCommand[i] == 'i' && modeCommand.size() == 2)
 				mode_chain << invite_only(targetChannel , operation, fd);
-			else if (modeCommand[i] == 't')
+			else if (modeCommand[i] == 't' && modeCommand.size() == 2)
 				mode_chain << topic_restriction(targetChannel, operation, fd);
-			//else if (modeCommand[i] == 'k')
-			//	mode_chain << channel_password(targetChannel, operation, fd, it);
-			// [o] Give/take Channel operator privilege
-			// [l] Set/remove the user limit to channel
+			else if (modeCommand[i] == 'k')
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << channel_password(targetChannel, operation, fd, it);
+			}
+			else if (modeCommand[i] == 'o')
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << operator_addon(targetChannel, operation, it);
+			}
+			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << user_limit(targetChannel, operation, it);
+			}
 		}
 	}
 	std::string chain = mode_chain.str();

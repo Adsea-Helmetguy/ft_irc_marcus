@@ -107,6 +107,8 @@ class Server
 		std::string	modeTo_execute(char opera, char mode);
 		std::string	invite_only(Channel *targetChannel, char operation, int fd);
 		std::string	topic_restriction(Channel *targetChannel, char operation, int fd);
-		std::string	channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator it);
-		std::string removechannelPassword();
+		std::string	channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it);
+		std::string removechannelPassword(int fd);
+		std::string	getchannelPassword() const;
+		std::string	operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it);
 };

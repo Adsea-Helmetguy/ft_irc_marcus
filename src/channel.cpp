@@ -20,8 +20,6 @@ Channel::Channel(const std::string &name, const std::string &password)
 	_created_time = getFormattedTime();
 	_inviteOnly = false;
 	_topicRestricted = false;
-	//for k
-	//for 0
 	//for l
 };
 
@@ -56,6 +54,11 @@ std::string Channel::getClientList()
 	//std::cout << "Printing client list" << std::endl;
 	//std::cout << clientList << std::endl;
 	return (clientList);
+}
+
+void Channel::addOperator(Client *client)
+{
+	this->_users.push_back(ChannelUser(client, true));
 }
 
 const std::string &Channel::getPassword() const
@@ -93,21 +96,6 @@ void Channel::addMember(Client *client)
 	_users.push_back(ChannelUser(client, false));
 }
 
-
-bool Channel::isOperator(Client *client) const
-{
-	for (size_t i = 0; i < _users.size(); ++i)
-	{
-		if (_users[i].client == client && _users[i].isOperator)
-			return (true);
-	}
-	return (false);
-}
-
-void Channel::addOperator(Client *client)
-{
-	_users.push_back(ChannelUser(client, true));
-}
 
 bool Channel::hasPassword() const
 {
