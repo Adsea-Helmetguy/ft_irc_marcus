@@ -198,7 +198,7 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			{
 				if (channel->getUsersSize() >= channel->getchannelLimit())
 				{
-					sendError(fd, ERR_BADCHANNELKEY(serverName, userNick, channelName));
+					sendError(fd, ERR_CHANNELISFULL(serverName, userNick, channelName));
 					return ;
 				}
 				std::cout << RED << "[DEBUG] MAN THE SIZE IS CURRENTLY-> " << RT << 
@@ -340,13 +340,11 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 				if (++it != cmd_lst.end())
 					mode_chain << operator_addon(targetChannel, operation, it);
 			}
-/*
 			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
 			{
 				if (++it != cmd_lst.end())
 					mode_chain << user_limit(targetChannel, operation, it);
 			}
-*/
 		}
 	}
 	std::string chain = mode_chain.str();
