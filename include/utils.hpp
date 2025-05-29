@@ -31,3 +31,4 @@ void					sendReply(int fd, const std::string &message);
 std::string				getFormattedTime();
 int						setnonblocking(int client_fd);
 std::string				sha256(const std::string &str);
+bool                	isNumber(const std::string &str);// -marcus-

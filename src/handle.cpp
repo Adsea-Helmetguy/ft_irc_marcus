@@ -181,6 +181,30 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
+			// check if the person channel is invite only and if the person is in _invitelist
+			if (channel->getchannelIsInviteOnly() == true)
+			{
+				std::cout << RED << "[DEBUG] I am channel is invite only!" << RT << std::endl;
+				if (channel->getisClientInvited(fd) == false)
+				{
+					std::cout << RED << "Error: " << userNick 
+						<< " tried to join but was not invited" << RT << std::endl;
+					sendError(fd, ERR_INVITEONLYCHAN(serverName, userNick, channelName));
+					return ;
+				}
+			}
+			// check if the channel is full
+			if (channel->IsChannelLimited() == true)
+			{
+				if (channel->getUsersSize() >= channel->getchannelLimit())
+				{
+					sendError(fd, ERR_BADCHANNELKEY(serverName, userNick, channelName));
+					return ;
+				}
+				std::cout << RED << "[DEBUG] MAN THE SIZE IS CURRENTLY-> " << RT << 
+						channel->getUsersSize() << RED << " WHILE THE LIMITSIZE IS-> " << RT 
+						<< channel->getchannelLimit() << std::endl;
+			}
 			// check if there is password and if the password provided is the same
 			if (channel->hasPassword() && channel->getPassword() != password)
 			{
@@ -214,15 +238,16 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	Client	*client = getClientByFd(fd);
 	if (!client)
 		return ;
-	if (cmd_lst.size() != 3)
+	if (cmd_lst.size() < 3)
 	{
 		std::cout << RED << "[DEBUG] cmd_lst.size() = " << cmd_lst.size() << RT << std::endl;
 		return;
 	}
 
+	std::cout << RED << "cmd_list size-> " << YELLOW << cmd_lst.size() << RT << std::endl;
 	std::list<std::string>::iterator	it = cmd_lst.begin();
-	++it;
-
+	if (++it == cmd_lst.end())
+		return;
 	//checks that you wrote '#' as well as channel name to it:
 	std::string	hash_and_channelName;
 	hash_and_channelName.clear();
@@ -266,12 +291,16 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		return;
 	}
 
-	++it;
+	if (++it == cmd_lst.end())
+		return;
 	//checking the third argument requirements
 	std::string	modeCommand;
 	if (!(*it).empty())
+	{
 		modeCommand = *it;
-	if (modeCommand.empty() && modeCommand.size() != 2)
+		std::cout << YELLOW << "VALUE OF MODECOMMAND = " << RT << modeCommand << std::endl;
+	}
+	if (modeCommand.empty() || modeCommand.size() < 2)
 	{
 		//command for mode must be "+i" or "-i"
 		std::cout << RED << "[DEBUG] Your Command for mode is not enough or empty." << RT << std::endl;
@@ -283,7 +312,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	mode_chain.clear();
 
 	std::cout << YELLOW << "[DEBUG] IF THE VALUE OF operation is = " << operation << RT << std::endl;
-	for (size_t i = 0; i < modeCommand.size(); i++)
+	for (size_t i = 0; i < 2; i++)
 	{
 		if (!modeCommand.empty() && (modeCommand[i] == '+' || modeCommand[i] == '-'))
 		{
@@ -296,22 +325,33 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 			std::cout << YELLOW << "[DEBUG] (operation = \"" RT << operation << YELLOW 
 				<< "\" | Value of this = \"" << RT << modeCommand[i] 
 				<< YELLOW << "\")" << RT << std::endl;
-			// [i] invite
-			if (modeCommand[i] == 'i')
+			std::cout << RED << "modeCommand.size() = " << RT << modeCommand.size() << std::endl;
+			if (modeCommand[i] == 'i' && modeCommand.size() == 2)
 				mode_chain << invite_only(targetChannel , operation, fd);
-			//else if (modeCommand[i] == 't') //topic restriction mode
-				//mode_chain << topic_restriction(channel, opera, mode_chain.str());
-			// [t] set/remove restrictions to channel operators
-				//Find out how are operator privileges given to anyone 
-				//in the server, how is it done here?
-			// [k] set/remove channel key(password)
-			// [o] Give/take Channel operator privilege
-			// [l] Set/remove the user limit to channel
+			else if (modeCommand[i] == 't' && modeCommand.size() == 2)
+				mode_chain << topic_restriction(targetChannel, operation, fd);
+			else if (modeCommand[i] == 'k')
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << channel_password(targetChannel, operation, fd, it);
+			}
+			else if (modeCommand[i] == 'o')
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << operator_addon(targetChannel, operation, it);
+			}
+/*
+			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
+			{
+				if (++it != cmd_lst.end())
+					mode_chain << user_limit(targetChannel, operation, it);
+			}
+*/
 		}
 	}
-	//std::string chain = mode_chain.str();
-	//if (chain.empty())
-	//	return;
+	std::string chain = mode_chain.str();
+	if (chain.empty())
+		return;
  	//targetChannel->sendTo_all(RPL_CHANGEMODE(cli->getHostname(), channel->GetName(), mode_chain.str(), arguments));
 	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
 }

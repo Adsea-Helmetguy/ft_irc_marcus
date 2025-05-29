@@ -19,6 +19,8 @@ Channel::Channel(const std::string &name, const std::string &password)
 	_topic = "Welcome to " + getName();
 	_created_time = getFormattedTime();
 	_inviteOnly = false;
+	_topicRestricted = false;
+	//for l
 };
 
 const std::string &Channel::getName() const
@@ -34,6 +36,11 @@ const std::string &Channel::getTopic()
 const std::vector<ChannelUser> &Channel::getUsers() const
 {
 	return (_users);
+}
+
+size_t Channel::getUsersSize() const
+{
+	return (_users.size());
 }
 
 std::string Channel::getClientList()
@@ -52,6 +59,11 @@ std::string Channel::getClientList()
 	//std::cout << "Printing client list" << std::endl;
 	//std::cout << clientList << std::endl;
 	return (clientList);
+}
+
+void Channel::addOperator(Client *client)
+{
+	this->_users.push_back(ChannelUser(client, true));
 }
 
 const std::string &Channel::getPassword() const
@@ -89,21 +101,6 @@ void Channel::addMember(Client *client)
 	_users.push_back(ChannelUser(client, false));
 }
 
-
-bool Channel::isOperator(Client *client) const
-{
-	for (size_t i = 0; i < _users.size(); ++i)
-	{
-		if (_users[i].client == client && _users[i].isOperator)
-			return (true);
-	}
-	return (false);
-}
-
-void Channel::addOperator(Client *client)
-{
-	_users.push_back(ChannelUser(client, true));
-}
 
 bool Channel::hasPassword() const
 {
@@ -149,51 +146,3 @@ void Channel::broadcast(const std::string &message)
 		sendReply(it->client->getFd(), message);
 	}
 }
-
-//for mode -marcus-
-void Channel::SetInviteOnly(bool enable_invite)
-{
-	if (enable_invite == true && this->_inviteOnly != true)
-	{
-		//clear the invite list before making the channel into a invite only channel
-		this->clearInviteList();
-		std::cout << YELLOW << "[DEBUG] Checking if list is cleared" << RT << std::endl;
-		if (this->_inviteList.empty())
-		{
-			std::cout << GREEN << "[SUCCESS] List is cleared!" << RT << std::endl;
-			return ;
-		}
-		std::cout << RED << "[DEBUG] Failed to clear list? WHY?" << RT << std::endl;
-	}
-	this->_inviteOnly = enable_invite;
-}
-
-bool	Channel::getchannelIsInviteOnly()
-{
-	return (this->_inviteOnly);
-}
-
-void	Channel::inviteClient(int clientFd)
-{
-	if (std::find(_inviteList.begin(), _inviteList.end(), clientFd) == _inviteList.end())
-		this->_inviteList.push_back(clientFd);
-}
-
-bool	Channel::getisClientInvited(int clientFd) const
-{
-	return (std::find(_inviteList.begin(), _inviteList.end(), clientFd) != _inviteList.end());
-}
-
-//once you joined after invite you can't join back unless invited again
-void	Channel::removeInvite(int clientFd)
-{
-	std::vector<int>::iterator it = std::find(_inviteList.begin(), _inviteList.end(), clientFd);
-	if (it != _inviteList.end())
-		this->_inviteList.erase(it);
-}
-
-void	Channel::clearInviteList()
-{
-	this->_inviteList.clear();
-}
-//for mode -marcus-

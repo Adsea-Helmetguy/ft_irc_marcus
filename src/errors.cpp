@@ -42,11 +42,25 @@ std::string ERR_CANNOTSENDTOCHAN(const std::string &serverName, const std::strin
 	return (":" + serverName  + " 404 " + clientNick + " " + channelName + " :Cannot send to channel" + CRLF);
 }
 
+// 441
+std::string ERR_USERNOTINCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName + " 441 " + clientNick + " " + channelName + " :They aren't on that channel" + CRLF);
+}
 
 // 442
 std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
 {
 	return (":" + serverName + " 442 " + clientNick + " " + channelName + " :You're not on that channel" + CRLF);
+}
+
+// 471
+std::string ERR_CHANNELISFULL(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
+
+// 473
+std::string ERR_INVITEONLYCHAN(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName + " 473 " + clientNick + " " + channelName + " :Cannot join channel (+i)" + CRLF);
 }
 
 
@@ -55,6 +69,7 @@ std::string ERR_BADCHANNELKEY(const std::string &serverName, const std::string &
 {
 	return (":" + serverName + " 475 " + clientNick + " " + channelName + " :Cannot join channel (+k) - bad key" + CRLF);
 }
+
 
 // 482
 std::string ERR_CHANOPRIVSNEEDED(const std::string &serverName, const std::string &clientNick, const std::string &channelName)

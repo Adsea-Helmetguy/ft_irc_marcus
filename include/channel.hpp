@@ -24,6 +24,9 @@ class Channel
 		std::string					_created_time;
 		bool						_inviteOnly;// -marcus-
 		std::vector<int>			_inviteList;// -marcus- 
+		bool						_topicRestricted;// -marcus-
+		size_t						_channellimitSize;// -marcus-
+		bool						_channelIslimited;// -marcus-
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -33,6 +36,7 @@ class Channel
 		const std::string &getName() const;
 		const std::string &getTopic();
 		const std::vector<ChannelUser> &getUsers() const;
+		size_t getUsersSize() const;
 		std::string getClientList();
 		const std::string &getPassword() const;
 		const std::string &getCreationTime() const;
@@ -42,10 +46,10 @@ class Channel
 		// add members
 		bool isMember(Client *client);
 		void addMember(Client *client);
-		// add operators
+
+		// add operator
 		void addOperator(Client *client);
 
-		bool isOperator(Client *client) const;
 		bool hasPassword() const;
 		void removeUser(Client *client);
 
@@ -54,12 +58,30 @@ class Channel
 
 
 		//for mode -marcus-:
-		void	SetInviteOnly(bool enable_invite);
-		bool	getchannelIsInviteOnly();
-			// Invite list methods
+			// INVITE (i)
+			void	SetInviteOnly(bool enable_invite, int fd);
+			bool	getchannelIsInviteOnly() const;
 			void	inviteClient(int clientFd);
 			bool	getisClientInvited(int clientFd) const;
 			void	removeInvite(int clientFd);
 			void	clearInviteList(); // Optional, maybe on mode -i
+			// TOPIC (t)
+			void	setTopicRestriction(bool setTopic, int fd);
+			bool	getisTopicRestricted() const;
+			// PASSWORD (k)
+			void		setchannelPassword(std::string password, int fd);
+			void		removechannelPassword(int fd);
+			std::string	getchannelPassword() const;
+			// OPERATOR PRIVILEGE (o)
+			void	OperatorTrue(std::list<std::string>::iterator &it);
+			void	OperatorFalse(std::list<std::string>::iterator &it);
+			bool	getUserOperator_status(ChannelUser user);
+			bool	isOperator(Client *client) const;
+			// USER LIMIT (l)
+			void	limitSet(std::list<std::string>::iterator &it);
+			void	limitUnset();
+			bool	IsChannelLimited() const;
+			size_t	getchannelLimit() const;
+			
 		//for mode -marcus-:
 };

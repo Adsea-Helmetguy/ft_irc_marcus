@@ -393,30 +393,101 @@ std::string	Server::modeTo_execute(char opera, char mode)
 		ss << opera << mode;
 	return (ss.str());
 }
-
-//edit int fd to get client's name instead
+//sets channel to invite only
 std::string	Server::invite_only(Channel *targetChannel, char operation, int fd)
 {
 	std::string	param;
 	param.clear();
 	(void)fd;
+
 	//Client* client = getClientByFd(fd);
 	//having issues trying to get client's name and sending reply:
 	//sendreply not appearing in my channel
 	if (operation == '+')
-	{
-		//targetChannel->setModeAtindex(0, true);
-		targetChannel->SetInviteOnly(true);//set the channel as invite only
-		param = modeTo_execute(operation, 'i');
-		//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
-	}
+		targetChannel->SetInviteOnly(true, fd);//set the channel as invite only
 	else if (operation == '-')
+		targetChannel->SetInviteOnly(false, fd);
+	param = modeTo_execute(operation, 'i');
+	if (targetChannel->getchannelIsInviteOnly() == true)
+		std::cout << GREEN << "[DEBUG] Channel is invite only now." << RT << std::endl;
+	std::cout << YELLOW << "[DEBUG] Current value of channel-> \"" << RED 
+		<< targetChannel->getchannelIsInviteOnly() << RT << "\"" << std::endl;
+	return (param);
+}
+
+std::string	Server::topic_restriction(Channel *targetChannel, char operation, int fd)
+{
+	std::string	param;
+	param.clear();
+	(void)fd;
+
+	if (operation == '+')
+		targetChannel->setTopicRestriction(true, fd);
+	else if (operation == '-')
+		targetChannel->setTopicRestriction(false, fd);
+	param = modeTo_execute(operation, 't');
+	if (targetChannel->getisTopicRestricted() == true)
+		std::cout << GREEN << "[DEBUG] Channel has a Topic now." << RT << std::endl;
+	std::cout << YELLOW << "[DEBUG] Topic value-> \"" << RED 
+		<< targetChannel->getTopic() << RT << "\"" << std::endl;
+	return (param);
+}
+
+std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it)
+{
+	std::string	param;
+	param.clear();
+	(void)fd;
+
+	std::cout << YELLOW << "Inside channel_password" << RT << std::endl;
+	if (!(*it).empty())
 	{
-		//targetChannel->setModeAtindex(0, false);
-		targetChannel->SetInviteOnly(false);
-		param = modeTo_execute(operation, 'i');
-		//sendReply(fd, "mode/" + targetChannel->getName() + " [-i] by client " + client->getNick());
+		if (operation == '+')
+			targetChannel->setchannelPassword(*it, fd);
+		else if (operation == '-')
+			targetChannel->removechannelPassword(fd);
+
+		param = modeTo_execute(operation, 'k');
+		if (!targetChannel->getchannelPassword().empty())
+		{
+			std::cout << GREEN << "[DEBUG] Channel has a password." << RT << std::endl;
+			std::cout << YELLOW << "[DEBUG] Password-> \"" << RED 
+				<< targetChannel->getchannelPassword() << RT << "\"" << std::endl;
+		}
+		else
+			std::cout << RED << "[DEBUG] Password unavailable." << RT << std::endl;
 	}
+	return (param);
+}
+
+//add the client's fd to the operatorlist
+std::string	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+{
+	std::string	param;
+	param.clear();
+	
+	std::cout << YELLOW << "Inside operator_addon" << RT << std::endl;
+	if (operation == '+')
+		targetChannel->OperatorTrue(it);
+	else if (operation == '-')
+		targetChannel->OperatorFalse(it);
+
+	param = modeTo_execute(operation, 'o');
+	return (param);
+}
+
+std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+{
+	std::string	param;
+	param.clear();
+	
+	std::cout << YELLOW << "Inside user_limit" << RT << std::endl;
+	if (operation == '+')
+		targetChannel->limitSet(it);
+	else if (operation == '-')
+		targetChannel->limitUnset();
+
+	param = modeTo_execute(operation, 'l');
 	return (param);
 }
 //Marcus functions
