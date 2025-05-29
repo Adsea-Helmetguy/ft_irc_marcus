@@ -342,8 +342,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 			}
 			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
 			{
-				if (++it != cmd_lst.end())
-					mode_chain << user_limit(targetChannel, operation, it);
+				mode_chain << user_limit(targetChannel, operation, it, cmd_lst);
 			}
 		}
 	}

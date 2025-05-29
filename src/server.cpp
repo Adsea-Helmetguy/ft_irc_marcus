@@ -476,13 +476,14 @@ std::string	Server::operator_addon(Channel *targetChannel, char operation, std::
 	return (param);
 }
 
-std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+//broadcast message?
+std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst)
 {
 	std::string	param;
 	param.clear();
-	
+
 	std::cout << YELLOW << "Inside user_limit" << RT << std::endl;
-	if (operation == '+')
+	if (operation == '+' && (++it != cmd_lst.end()))
 		targetChannel->limitSet(it);
 	else if (operation == '-')
 		targetChannel->limitUnset();
