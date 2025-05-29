@@ -193,6 +193,18 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 					return ;
 				}
 			}
+			// check if the channel is full
+			if (channel->IsChannelLimited() == true)
+			{
+				if (channel->getUsersSize() >= channel->getchannelLimit())
+				{
+					sendError(fd, ERR_BADCHANNELKEY(serverName, userNick, channelName));
+					return ;
+				}
+				std::cout << RED << "[DEBUG] MAN THE SIZE IS CURRENTLY-> " << RT << 
+						channel->getUsersSize() << RED << " WHILE THE LIMITSIZE IS-> " << RT 
+						<< channel->getchannelLimit() << std::endl;
+			}
 			// check if there is password and if the password provided is the same
 			if (channel->hasPassword() && channel->getPassword() != password)
 			{
@@ -328,11 +340,13 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 				if (++it != cmd_lst.end())
 					mode_chain << operator_addon(targetChannel, operation, it);
 			}
+/*
 			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
 			{
 				if (++it != cmd_lst.end())
 					mode_chain << user_limit(targetChannel, operation, it);
 			}
+*/
 		}
 	}
 	std::string chain = mode_chain.str();

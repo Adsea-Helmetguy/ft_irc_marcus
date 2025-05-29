@@ -25,8 +25,8 @@ class Channel
 		bool						_inviteOnly;// -marcus-
 		std::vector<int>			_inviteList;// -marcus- 
 		bool						_topicRestricted;// -marcus-
-		size_t						_limitsize;// -marcus-
-		bool						_limitset;// -marcus-
+		size_t						_channellimitSize;// -marcus-
+		bool						_channelIslimited;// -marcus-
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -36,6 +36,7 @@ class Channel
 		const std::string &getName() const;
 		const std::string &getTopic();
 		const std::vector<ChannelUser> &getUsers() const;
+		size_t getUsersSize() const;
 		std::string getClientList();
 		const std::string &getPassword() const;
 		const std::string &getCreationTime() const;
@@ -77,6 +78,10 @@ class Channel
 			bool	getUserOperator_status(ChannelUser user);
 			bool	isOperator(Client *client) const;
 			// USER LIMIT (l)
+			void	limitSet(std::list<std::string>::iterator &it);
+			void	limitUnset();
+			bool	IsChannelLimited() const;
+			size_t	getchannelLimit() const;
 			
 		//for mode -marcus-:
 };

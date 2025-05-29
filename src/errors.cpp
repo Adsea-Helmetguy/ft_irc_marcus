@@ -54,6 +54,8 @@ std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &c
 	return (":" + serverName + " 442 " + clientNick + " " + channelName + " :You're not on that channel" + CRLF);
 }
 
+// 471
+std::string ERR_CHANNELISFULL(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
 
 // 473
 std::string ERR_INVITEONLYCHAN(const std::string &serverName, const std::string &clientNick, const std::string &channelName)

@@ -158,5 +158,40 @@ bool	Channel::isOperator(Client *client) const
 //|--------------------------------------|
 //|           -USER LIMIT-               |
 //|--------------------------------------|
+void	Channel::limitSet(std::list<std::string>::iterator &it)
+{
+	//check if its a number first
+	if (isNumber(*it) == false)
+	{
+		std::cout << RED << "A NON-NUMBER! RETURNED!" << RT << std::endl;
+		return;
+	}
+	//it will contain the value of the limit we need to set.
+	std::stringstream	value1;
+	int					limitset;
+	value1.clear();
 
+	value1.str(*it);
+	value1 >> limitset;
+	std::cout << GREEN << "Value of limitset = " << RT << limitset << std::endl;
+
+	//Once the moment you got the number, update the channel's values
+	this->_channelIslimited = true;
+	this->_channellimitSize = limitset;
+}
+
+void	Channel::limitUnset()
+{
+	this->_channelIslimited = false;
+}
+
+bool	Channel::IsChannelLimited() const
+{
+	return (this->_channelIslimited);
+}
+
+size_t	Channel::getchannelLimit() const
+{
+	return (this->_channellimitSize);
+}
 

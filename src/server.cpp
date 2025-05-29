@@ -483,9 +483,9 @@ std::string	Server::user_limit(Channel *targetChannel, char operation, std::list
 	
 	std::cout << YELLOW << "Inside user_limit" << RT << std::endl;
 	if (operation == '+')
-		targetChannel->limitset(it);
+		targetChannel->limitSet(it);
 	else if (operation == '-')
-		targetChannel->limitunset(it);
+		targetChannel->limitUnset();
 
 	param = modeTo_execute(operation, 'l');
 	return (param);

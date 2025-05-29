@@ -38,6 +38,11 @@ const std::vector<ChannelUser> &Channel::getUsers() const
 	return (_users);
 }
 
+size_t Channel::getUsersSize() const
+{
+	return (_users.size());
+}
+
 std::string Channel::getClientList()
 {
 	std::string clientList = "";
