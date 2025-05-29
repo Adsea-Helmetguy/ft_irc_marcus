@@ -55,7 +55,10 @@ std::string ERR_NOTONCHANNEL(const std::string &serverName, const std::string &c
 }
 
 // 471
-std::string ERR_CHANNELISFULL(const std::string &serverName, const std::string &clientNick, const std::string &channelName);
+std::string ERR_CHANNELISFULL(const std::string &serverName, const std::string &clientNick, const std::string &channelName)
+{
+	return (":" + serverName + " 471 " + clientNick + " " + channelName + " :Cannot join channel (+l) (Channel is full)" + CRLF);
+}
 
 // 473
 std::string ERR_INVITEONLYCHAN(const std::string &serverName, const std::string &clientNick, const std::string &channelName)

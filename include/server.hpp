@@ -111,5 +111,5 @@ class Server
 		std::string	removechannelPassword(int fd);
 		std::string	getchannelPassword() const;
 		std::string	operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it);
-		std::string	user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it);
+		std::string	user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst);
 };
