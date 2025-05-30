@@ -384,30 +384,30 @@ const std::vector<Client*>& Server::getClients() const
 }
 
 //Marcus functions
-std::string	Server::modeTo_execute(char opera, char mode)
+std::string	Server::modeTo_execute(char opera, char mode, Channel *targetChannel, Client &client)
 {
 	std::stringstream ss;
 	ss.clear();
 
 	if (opera && mode)
-		ss << opera << mode;
+		ss << "mode/" << targetChannel->getName() << " ["<< opera << mode << "] by " << client.getNick();
 	return (ss.str());
 }
+
 //sets channel to invite only
-std::string	Server::invite_only(Channel *targetChannel, char operation, int fd)
+std::string	Server::invite_only(Channel *targetChannel, char operation, int fd, Client &client)
 {
 	std::string	param;
 	param.clear();
-	(void)fd;
 
 	//Client* client = getClientByFd(fd);
 	//having issues trying to get client's name and sending reply:
 	//sendreply not appearing in my channel
 	if (operation == '+')
-		targetChannel->SetInviteOnly(true, fd);//set the channel as invite only
+		targetChannel->SetInviteOnly(true);//set the channel as invite only
 	else if (operation == '-')
-		targetChannel->SetInviteOnly(false, fd);
-	param = modeTo_execute(operation, 'i');
+		targetChannel->SetInviteOnly(false);
+	param = modeTo_execute(operation, 'i', targetChannel, client);
 	if (targetChannel->getchannelIsInviteOnly() == true)
 		std::cout << GREEN << "[DEBUG] Channel is invite only now." << RT << std::endl;
 	std::cout << YELLOW << "[DEBUG] Current value of channel-> \"" << RED 
@@ -415,17 +415,17 @@ std::string	Server::invite_only(Channel *targetChannel, char operation, int fd)
 	return (param);
 }
 
-std::string	Server::topic_restriction(Channel *targetChannel, char operation, int fd)
+std::string	Server::topic_restriction(Channel *targetChannel, char operation, int fd, Client &client)
 {
 	std::string	param;
 	param.clear();
 	(void)fd;
 
 	if (operation == '+')
-		targetChannel->setTopicRestriction(true, fd);
+		targetChannel->setTopicRestriction(true);
 	else if (operation == '-')
-		targetChannel->setTopicRestriction(false, fd);
-	param = modeTo_execute(operation, 't');
+		targetChannel->setTopicRestriction(false);
+	param = modeTo_execute(operation, 't', targetChannel, client);
 	if (targetChannel->getisTopicRestricted() == true)
 		std::cout << GREEN << "[DEBUG] Channel has a Topic now." << RT << std::endl;
 	std::cout << YELLOW << "[DEBUG] Topic value-> \"" << RED 
@@ -433,7 +433,7 @@ std::string	Server::topic_restriction(Channel *targetChannel, char operation, in
 	return (param);
 }
 
-std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it)
+std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it, Client &client)
 {
 	std::string	param;
 	param.clear();
@@ -443,11 +443,11 @@ std::string	Server::channel_password(Channel *targetChannel, char operation, int
 	if (!(*it).empty())
 	{
 		if (operation == '+')
-			targetChannel->setchannelPassword(*it, fd);
+			targetChannel->setchannelPassword(*it);
 		else if (operation == '-')
-			targetChannel->removechannelPassword(fd);
+			targetChannel->removechannelPassword();
 
-		param = modeTo_execute(operation, 'k');
+		param = modeTo_execute(operation, 'k', targetChannel, client);
 		if (!targetChannel->getchannelPassword().empty())
 		{
 			std::cout << GREEN << "[DEBUG] Channel has a password." << RT << std::endl;
@@ -461,7 +461,7 @@ std::string	Server::channel_password(Channel *targetChannel, char operation, int
 }
 
 //add the client's fd to the operatorlist
-std::string	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it)
+std::string	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client)
 {
 	std::string	param;
 	param.clear();
@@ -472,12 +472,12 @@ std::string	Server::operator_addon(Channel *targetChannel, char operation, std::
 	else if (operation == '-')
 		targetChannel->OperatorFalse(it);
 
-	param = modeTo_execute(operation, 'o');
+	param = modeTo_execute(operation, 'o', targetChannel, client);
 	return (param);
 }
 
 //broadcast message?
-std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst)
+std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client)
 {
 	std::string	param;
 	param.clear();
@@ -488,7 +488,7 @@ std::string	Server::user_limit(Channel *targetChannel, char operation, std::list
 	else if (operation == '-')
 		targetChannel->limitUnset();
 
-	param = modeTo_execute(operation, 'l');
+	param = modeTo_execute(operation, 'l', targetChannel, client);
 	return (param);
 }
 //Marcus functions

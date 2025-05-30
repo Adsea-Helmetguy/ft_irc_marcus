@@ -327,28 +327,30 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 				<< YELLOW << "\")" << RT << std::endl;
 			std::cout << RED << "modeCommand.size() = " << RT << modeCommand.size() << std::endl;
 			if (modeCommand[i] == 'i' && modeCommand.size() == 2)
-				mode_chain << invite_only(targetChannel , operation, fd);
+				mode_chain << invite_only(targetChannel , operation, fd, *client);
 			else if (modeCommand[i] == 't' && modeCommand.size() == 2)
-				mode_chain << topic_restriction(targetChannel, operation, fd);
+				mode_chain << topic_restriction(targetChannel, operation, fd, *client);
 			else if (modeCommand[i] == 'k')
 			{
 				if (++it != cmd_lst.end())
-					mode_chain << channel_password(targetChannel, operation, fd, it);
+					mode_chain << channel_password(targetChannel, operation, fd, it, *client);
 			}
 			else if (modeCommand[i] == 'o')
 			{
 				if (++it != cmd_lst.end())
-					mode_chain << operator_addon(targetChannel, operation, it);
+					mode_chain << operator_addon(targetChannel, operation, it, *client);
 			}
 			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
 			{
-				mode_chain << user_limit(targetChannel, operation, it, cmd_lst);
+				mode_chain << user_limit(targetChannel, operation, it, cmd_lst, *client);
 			}
 		}
 	}
 	std::string chain = mode_chain.str();
 	if (chain.empty())
 		return;
+	//Broadcast your message here!
+	//targetChannel->broadcast(chain);
  	//targetChannel->sendTo_all(RPL_CHANGEMODE(cli->getHostname(), channel->GetName(), mode_chain.str(), arguments));
 	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
 }

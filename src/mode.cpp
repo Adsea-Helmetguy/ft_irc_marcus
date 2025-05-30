@@ -4,9 +4,8 @@
 //|--------------------------------------|
 //|             -INVITE-                 |
 //|--------------------------------------|
-void Channel::SetInviteOnly(bool enable_invite, int fd)
+void Channel::SetInviteOnly(bool enable_invite)
 {
-	(void)fd;
 	if (enable_invite == true && this->_inviteOnly != true)
 	{
 		//clear the invite list before making the channel into a invite only channel
@@ -20,7 +19,6 @@ void Channel::SetInviteOnly(bool enable_invite, int fd)
 			std::cout << RED << "[DEBUG] Failed to clear list? WHY?" << RT << std::endl;
 	}
 	this->_inviteOnly = enable_invite;
-	//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
 }
 
 bool	Channel::getchannelIsInviteOnly() const
@@ -58,9 +56,8 @@ void	Channel::clearInviteList()
 //|--------------------------------------|
 //|              -TOPIC-                 |
 //|--------------------------------------|
-void	Channel::setTopicRestriction(bool setTopic, int fd)
+void	Channel::setTopicRestriction(bool setTopic)
 {
-	(void)fd;
 	this->_topicRestricted = setTopic;
 	//sendReply(fd, "mode/" + targetChannel->getName() + " [+t/-t] by client " + client->getNick());
 }
@@ -74,16 +71,14 @@ bool	Channel::getisTopicRestricted() const
 //|--------------------------------------|
 //|            -PASSWORD-                |
 //|--------------------------------------|
-void	Channel::setchannelPassword(std::string password, int fd)
+void	Channel::setchannelPassword(std::string password)
 {
-	(void)fd;
 	this->_password = password;
 	//sendReply(fd, "mode/" + this->getName() + " [+k] by client " + client->getNick());
 }
 
-void	Channel::removechannelPassword(int fd)
+void	Channel::removechannelPassword()
 {
-	(void)fd;
 	if (!this->_password.empty())
 		this->_password.clear();
 	//sendReply(fd, "mode/" + this->getName() + " [-k] by client " + client->getNick());
