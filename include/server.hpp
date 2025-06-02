@@ -74,7 +74,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
-		const std::string &getCreatedTime() const;
+		//const std::string &getCreatedTime() const;
 		Client* getClientByNick(const std::string &clientNick);
 
 		// add and remove clients
@@ -104,12 +104,12 @@ class Server
 		void		removeChannel(const std::string &channelName);
 
 		//mode -marcus-
-		std::string	modeTo_execute(char opera, char mode, Channel *targetChannel, Client &client);
-		std::string	invite_only(Channel *targetChannel, char operation, int fd, Client &client);
-		std::string	topic_restriction(Channel *targetChannel, char operation, int fd, Client &client);
-		std::string	channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it, Client &client);
-		std::string	removechannelPassword(int fd);
+		void	modeTo_execute(char operation, char mode, Channel *targetChannel, Client &client, std::string stringPassed);
+		void	invite_only(Channel *targetChannel, char operation, Client &client);
+		void	topic_restriction(Channel *targetChannel, char operation, Client &client);
+		void	channel_password(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client);
+		void	removechannelPassword();
 		std::string	getchannelPassword() const;
-		std::string	operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client);
-		std::string	user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client);
+		void	operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client);
+		void	user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client);
 };

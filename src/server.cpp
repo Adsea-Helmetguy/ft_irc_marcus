@@ -383,71 +383,71 @@ const std::vector<Client*>& Server::getClients() const
 	return (_clients);
 }
 
-//Marcus functions
-std::string	Server::modeTo_execute(char opera, char mode, Channel *targetChannel, Client &client)
+//|--------------------------------------|
+//|        -MARCUS FUNCTIONS-            |
+//|--------------------------------------|
+void	Server::modeTo_execute(char operation, char mode, Channel *targetChannel, Client &client, std::string stringPassed)
 {
-	std::stringstream ss;
-	ss.clear();
+	std::stringstream logMsg;
+	std::string msg;
+	logMsg.clear();
+	msg.clear();
 
-	if (opera && mode)
-		ss << "mode/" << targetChannel->getName() << " ["<< opera << mode << "] by " << client.getNick();
-	return (ss.str());
+	if (operation == '\0' || mode == '\0' || targetChannel == NULL)
+	{
+		std::cout << RED << "SOMETHING IS WRONG HERE" << RT << std::endl;
+		return ;
+	}
+	if (mode == 'i' || mode == 't')
+		msg = ":" + client.getPrefix() + " MODE " + targetChannel->getName() + " " + operation + mode + "\r\n";
+	else
+	{
+		if (stringPassed.empty())
+			return ;
+		msg = ":" + client.getPrefix() + " MODE " + targetChannel->getName() + " " + operation 
+			+ mode + " " + stringPassed + "\r\n";
+	}
+	targetChannel->broadcast(msg);
 }
 
 //sets channel to invite only
-std::string	Server::invite_only(Channel *targetChannel, char operation, int fd, Client &client)
+void	Server::invite_only(Channel *targetChannel, char operation, Client &client)
 {
-	std::string	param;
-	param.clear();
-
-	//Client* client = getClientByFd(fd);
-	//having issues trying to get client's name and sending reply:
-	//sendreply not appearing in my channel
 	if (operation == '+')
 		targetChannel->SetInviteOnly(true);//set the channel as invite only
 	else if (operation == '-')
 		targetChannel->SetInviteOnly(false);
-	param = modeTo_execute(operation, 'i', targetChannel, client);
 	if (targetChannel->getchannelIsInviteOnly() == true)
 		std::cout << GREEN << "[DEBUG] Channel is invite only now." << RT << std::endl;
 	std::cout << YELLOW << "[DEBUG] Current value of channel-> \"" << RED 
 		<< targetChannel->getchannelIsInviteOnly() << RT << "\"" << std::endl;
-	return (param);
+	modeTo_execute(operation, 'i', targetChannel, client, "");
 }
 
-std::string	Server::topic_restriction(Channel *targetChannel, char operation, int fd, Client &client)
+void	Server::topic_restriction(Channel *targetChannel, char operation, Client &client)
 {
-	std::string	param;
-	param.clear();
-	(void)fd;
-
 	if (operation == '+')
 		targetChannel->setTopicRestriction(true);
 	else if (operation == '-')
 		targetChannel->setTopicRestriction(false);
-	param = modeTo_execute(operation, 't', targetChannel, client);
+
+	modeTo_execute(operation, 't', targetChannel, client, "");
 	if (targetChannel->getisTopicRestricted() == true)
 		std::cout << GREEN << "[DEBUG] Channel has a Topic now." << RT << std::endl;
 	std::cout << YELLOW << "[DEBUG] Topic value-> \"" << RED 
 		<< targetChannel->getTopic() << RT << "\"" << std::endl;
-	return (param);
 }
 
-std::string	Server::channel_password(Channel *targetChannel, char operation, int fd, std::list<std::string>::iterator &it, Client &client)
+void	Server::channel_password(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client)
 {
-	std::string	param;
-	param.clear();
-	(void)fd;
-
-	std::cout << YELLOW << "Inside channel_password" << RT << std::endl;
 	if (!(*it).empty())
 	{
 		if (operation == '+')
-			targetChannel->setchannelPassword(*it);
+				targetChannel->setchannelPassword(*it);
 		else if (operation == '-')
 			targetChannel->removechannelPassword();
 
-		param = modeTo_execute(operation, 'k', targetChannel, client);
+		modeTo_execute(operation, 'k', targetChannel, client, targetChannel->getchannelPassword());
 		if (!targetChannel->getchannelPassword().empty())
 		{
 			std::cout << GREEN << "[DEBUG] Channel has a password." << RT << std::endl;
@@ -455,40 +455,40 @@ std::string	Server::channel_password(Channel *targetChannel, char operation, int
 				<< targetChannel->getchannelPassword() << RT << "\"" << std::endl;
 		}
 		else
-			std::cout << RED << "[DEBUG] Password unavailable." << RT << std::endl;
+			std::cout << YELLOW << "[DEBUG] Password unavailable." << RT << std::endl;
 	}
-	return (param);
 }
 
 //add the client's fd to the operatorlist
-std::string	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client)
+void	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client)
 {
-	std::string	param;
-	param.clear();
-	
+	bool	print_success = false;
+
 	std::cout << YELLOW << "Inside operator_addon" << RT << std::endl;
 	if (operation == '+')
-		targetChannel->OperatorTrue(it);
+		targetChannel->OperatorTrue(it, print_success);
 	else if (operation == '-')
-		targetChannel->OperatorFalse(it);
-
-	param = modeTo_execute(operation, 'o', targetChannel, client);
-	return (param);
+		targetChannel->OperatorFalse(it, print_success);
+	
+	if (print_success == true)
+	{
+		std::cout << GREEN << "[JUST CHECKING] Name is---> " << *it << RT << std::endl;
+		modeTo_execute(operation, 'o', targetChannel, client, *it);
+	}
 }
 
 //broadcast message?
-std::string	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client)
+void	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client)
 {
-	std::string	param;
-	param.clear();
+	bool	print_success = false;
 
 	std::cout << YELLOW << "Inside user_limit" << RT << std::endl;
 	if (operation == '+' && (++it != cmd_lst.end()))
-		targetChannel->limitSet(it);
+		targetChannel->limitSet(it, print_success);
 	else if (operation == '-')
-		targetChannel->limitUnset();
+		targetChannel->limitUnset(print_success);
 
-	param = modeTo_execute(operation, 'l', targetChannel, client);
-	return (param);
+	if (print_success == true)
+		modeTo_execute(operation, 'l', targetChannel, client, *it);
 }
 //Marcus functions

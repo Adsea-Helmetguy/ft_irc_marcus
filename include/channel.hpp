@@ -73,13 +73,13 @@ class Channel
 			void		removechannelPassword();
 			std::string	getchannelPassword() const;
 			// OPERATOR PRIVILEGE (o)
-			void	OperatorTrue(std::list<std::string>::iterator &it);
-			void	OperatorFalse(std::list<std::string>::iterator &it);
+			void	OperatorTrue(std::list<std::string>::iterator &it, bool &print_success);
+			void	OperatorFalse(std::list<std::string>::iterator &it, bool &print_success);
 			bool	getUserOperator_status(ChannelUser user);
 			bool	isOperator(Client *client) const;
 			// USER LIMIT (l)
-			void	limitSet(std::list<std::string>::iterator &it);
-			void	limitUnset();
+			void	limitSet(std::list<std::string>::iterator &it, bool &print_success);
+			void	limitUnset(bool &print_success);
 			bool	IsChannelLimited() const;
 			size_t	getchannelLimit() const;
 			
