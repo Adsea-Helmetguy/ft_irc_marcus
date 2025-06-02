@@ -4,9 +4,8 @@
 //|--------------------------------------|
 //|             -INVITE-                 |
 //|--------------------------------------|
-void Channel::SetInviteOnly(bool enable_invite, int fd)
+void Channel::SetInviteOnly(bool enable_invite)
 {
-	(void)fd;
 	if (enable_invite == true && this->_inviteOnly != true)
 	{
 		//clear the invite list before making the channel into a invite only channel
@@ -20,7 +19,6 @@ void Channel::SetInviteOnly(bool enable_invite, int fd)
 			std::cout << RED << "[DEBUG] Failed to clear list? WHY?" << RT << std::endl;
 	}
 	this->_inviteOnly = enable_invite;
-	//sendReply(fd, "mode/" + targetChannel->getName() + " [+i] by client " + client->getNick());
 }
 
 bool	Channel::getchannelIsInviteOnly() const
@@ -58,9 +56,8 @@ void	Channel::clearInviteList()
 //|--------------------------------------|
 //|              -TOPIC-                 |
 //|--------------------------------------|
-void	Channel::setTopicRestriction(bool setTopic, int fd)
+void	Channel::setTopicRestriction(bool setTopic)
 {
-	(void)fd;
 	this->_topicRestricted = setTopic;
 	//sendReply(fd, "mode/" + targetChannel->getName() + " [+t/-t] by client " + client->getNick());
 }
@@ -74,16 +71,14 @@ bool	Channel::getisTopicRestricted() const
 //|--------------------------------------|
 //|            -PASSWORD-                |
 //|--------------------------------------|
-void	Channel::setchannelPassword(std::string password, int fd)
+void	Channel::setchannelPassword(std::string password)
 {
-	(void)fd;
 	this->_password = password;
 	//sendReply(fd, "mode/" + this->getName() + " [+k] by client " + client->getNick());
 }
 
-void	Channel::removechannelPassword(int fd)
+void	Channel::removechannelPassword()
 {
-	(void)fd;
 	if (!this->_password.empty())
 		this->_password.clear();
 	//sendReply(fd, "mode/" + this->getName() + " [-k] by client " + client->getNick());
@@ -97,7 +92,7 @@ std::string	Channel::getchannelPassword() const
 //|--------------------------------------|
 //|            -OPERATOR-                |
 //|--------------------------------------|
-void	Channel::OperatorTrue(std::list<std::string>::iterator &it)
+void	Channel::OperatorTrue(std::list<std::string>::iterator &it, bool &print_success)
 {
 	std::cout << RED << "VALUE OF IT = \"" << RT << *it << RED << "\"" << RT << std::endl;
 	for (size_t i = 0; i < _users.size(); ++i)
@@ -107,15 +102,14 @@ void	Channel::OperatorTrue(std::list<std::string>::iterator &it)
 			this->_users[i].isOperator = true;
 			std::cout << "Operator \"" << this->getUserOperator_status(this->_users[i]) 
 					<< "\"" << RT << std::endl;
+			print_success = true;
 			return;
 		}
 	}
 	std::cout << RED << "Dude can't be found here." << RT << std::endl;
-	//reply guide ask for help
-	//ERR_USERNOTINCHANNEL
 }
 
-void	Channel::OperatorFalse(std::list<std::string>::iterator &it)
+void	Channel::OperatorFalse(std::list<std::string>::iterator &it, bool &print_success)
 {
 	std::cout << RED << "VALUE OF IT = \"" << RT << *it << RED << "\"" << RT << std::endl;
 	for (size_t i = 0; i < _users.size(); ++i)
@@ -126,12 +120,11 @@ void	Channel::OperatorFalse(std::list<std::string>::iterator &it)
 
 			std::cout << "Operator \"" << this->getUserOperator_status(this->_users[i]) 
 					<< "\"" << RT << std::endl;
+			print_success = true;
 			return;
 		}
 	}
 	std::cout << RED << "Dude can't be found here." << RT << std::endl;
-	//reply guide ask for help
-	//ERR_USERNOTINCHANNEL
 }
 
 bool	Channel::getUserOperator_status(const ChannelUser user)
@@ -158,7 +151,7 @@ bool	Channel::isOperator(Client *client) const
 //|--------------------------------------|
 //|           -USER LIMIT-               |
 //|--------------------------------------|
-void	Channel::limitSet(std::list<std::string>::iterator &it)
+void	Channel::limitSet(std::list<std::string>::iterator &it, bool &print_success)
 {
 	//check if its a number first
 	if (isNumber(*it) == false)
@@ -178,11 +171,13 @@ void	Channel::limitSet(std::list<std::string>::iterator &it)
 	//Once the moment you got the number, update the channel's values
 	this->_channelIslimited = true;
 	this->_channellimitSize = limitset;
+	print_success = true;
 }
 
-void	Channel::limitUnset()
+void	Channel::limitUnset(bool &print_success)
 {
 	this->_channelIslimited = false;
+	print_success = true;
 }
 
 bool	Channel::IsChannelLimited() const

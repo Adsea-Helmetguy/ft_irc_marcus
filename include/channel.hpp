@@ -59,27 +59,27 @@ class Channel
 
 		//for mode -marcus-:
 			// INVITE (i)
-			void	SetInviteOnly(bool enable_invite, int fd);
+			void	SetInviteOnly(bool enable_invite);
 			bool	getchannelIsInviteOnly() const;
 			void	inviteClient(int clientFd);
 			bool	getisClientInvited(int clientFd) const;
 			void	removeInvite(int clientFd);
 			void	clearInviteList(); // Optional, maybe on mode -i
 			// TOPIC (t)
-			void	setTopicRestriction(bool setTopic, int fd);
+			void	setTopicRestriction(bool setTopic);
 			bool	getisTopicRestricted() const;
 			// PASSWORD (k)
-			void		setchannelPassword(std::string password, int fd);
-			void		removechannelPassword(int fd);
+			void		setchannelPassword(std::string password);
+			void		removechannelPassword();
 			std::string	getchannelPassword() const;
 			// OPERATOR PRIVILEGE (o)
-			void	OperatorTrue(std::list<std::string>::iterator &it);
-			void	OperatorFalse(std::list<std::string>::iterator &it);
+			void	OperatorTrue(std::list<std::string>::iterator &it, bool &print_success);
+			void	OperatorFalse(std::list<std::string>::iterator &it, bool &print_success);
 			bool	getUserOperator_status(ChannelUser user);
 			bool	isOperator(Client *client) const;
 			// USER LIMIT (l)
-			void	limitSet(std::list<std::string>::iterator &it);
-			void	limitUnset();
+			void	limitSet(std::list<std::string>::iterator &it, bool &print_success);
+			void	limitUnset(bool &print_success);
 			bool	IsChannelLimited() const;
 			size_t	getchannelLimit() const;
 			

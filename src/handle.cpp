@@ -308,10 +308,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	}
 
 	char	operation = '\0';
-	std::stringstream	mode_chain;
-	mode_chain.clear();
 
-	std::cout << YELLOW << "[DEBUG] IF THE VALUE OF operation is = " << operation << RT << std::endl;
 	for (size_t i = 0; i < 2; i++)
 	{
 		if (!modeCommand.empty() && (modeCommand[i] == '+' || modeCommand[i] == '-'))
@@ -327,30 +324,24 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 				<< YELLOW << "\")" << RT << std::endl;
 			std::cout << RED << "modeCommand.size() = " << RT << modeCommand.size() << std::endl;
 			if (modeCommand[i] == 'i' && modeCommand.size() == 2)
-				mode_chain << invite_only(targetChannel , operation, fd);
+				invite_only(targetChannel , operation, *client);
 			else if (modeCommand[i] == 't' && modeCommand.size() == 2)
-				mode_chain << topic_restriction(targetChannel, operation, fd);
+				topic_restriction(targetChannel, operation, *client);
 			else if (modeCommand[i] == 'k')
 			{
 				if (++it != cmd_lst.end())
-					mode_chain << channel_password(targetChannel, operation, fd, it);
+					channel_password(targetChannel, operation, it, *client);
 			}
 			else if (modeCommand[i] == 'o')
 			{
 				if (++it != cmd_lst.end())
-					mode_chain << operator_addon(targetChannel, operation, it);
+					operator_addon(targetChannel, operation, it, *client);
 			}
 			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
-			{
-				mode_chain << user_limit(targetChannel, operation, it, cmd_lst);
-			}
+				user_limit(targetChannel, operation, it, cmd_lst, *client);
 		}
 	}
-	std::string chain = mode_chain.str();
-	if (chain.empty())
-		return;
- 	//targetChannel->sendTo_all(RPL_CHANGEMODE(cli->getHostname(), channel->GetName(), mode_chain.str(), arguments));
-	std::cout << GREEN << "[DEBUG] FINISH!!! WELL DONE" << RT << std::endl;
+	std::cout << GREEN << "[SUCCESS] END of the LINE! FINISH!" << RT << std::endl;
 }
 
 void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
