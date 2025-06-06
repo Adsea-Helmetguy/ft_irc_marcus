@@ -45,3 +45,5 @@ std::string RPL_ENDOFNAMES(const std::string &serverName, const std::string &cli
 std::string RPL_JOINMSG(const std::string &clientNick, const std::string &clientUsername, const std::string &clientHostname, const std::string &channelName);
 
 std::string RPL_PONG(const std::string token);
+
+std::string RPL_TOPICWHOTIME(const std::string &serverName, const std::string &clientNick, const std::string &channelName, const std::string &setter, time_t timestamp);

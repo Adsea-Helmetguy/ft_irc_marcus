@@ -21,6 +21,11 @@ Channel::Channel(const std::string &name, const std::string &password)
 	_inviteOnly = false;
 	_topicRestricted = false;
 	//for l
+	//chanika
+    _topicSetter = "";
+    _topicTime = 0;
+    _channellimitSize = 0;
+    _channelIslimited = false;
 };
 
 const std::string &Channel::getName() const
@@ -145,4 +150,65 @@ void Channel::broadcast(const std::string &message)
 	{
 		sendReply(it->client->getFd(), message);
 	}
+}
+
+// -chanika-
+void Channel::setTopic(const std::string& topic)
+{
+    this->_topic = topic;
+    std::cout << CYAN << "[DEBUG] Topic set to: '" << topic << "'" << RT << std::endl;
+}
+
+std::string Channel::getTopic() const
+{
+    return this->_topic;
+}
+
+void Channel::setTopicSetter(const std::string& setter)
+{
+    this->_topicSetter = setter;
+}
+
+std::string Channel::getTopicSetter() const
+{
+    return this->_topicSetter;
+}
+
+void Channel::setTopicTime(time_t timestamp)
+{
+    this->_topicTime = timestamp;
+}
+
+time_t Channel::getTopicTime() const
+{
+    return this->_topicTime;
+}
+
+std::string Channel::getTopicTimeString() const
+{
+    std::ostringstream oss;
+    oss << this->_topicTime;
+    return oss.str();
+}
+
+bool Channel::kickUser(Client *operator_client, Client *target_client, const std::string &reason)
+{
+	// Check if operator has permission to kick
+	if (!isOperator(operator_client))
+		return false;
+	
+	// Check if the target is in the channel
+	if (!isMember(target_client))
+		return false;
+	
+	// Notify all channel members about the kick
+	std::string kickMessage = ":" + operator_client->getPrefix() + " KICK " + _name + " " + 
+		target_client->getNick() + " :" + reason + "\r\n";
+	
+	broadcast(kickMessage);
+	
+	// Remove the user from the channel
+	removeUser(target_client);
+	
+	return true;
 }

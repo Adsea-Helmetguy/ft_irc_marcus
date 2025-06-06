@@ -80,6 +80,7 @@ std::string RPL_ENDOFNAMES(const std::string &serverName, const std::string &cli
 	return (":" + serverName + " 366 " + clientNick + " " + channelName + " :End of /NAMES list." + CRLF);
 }
 
+// join room message
 std::string RPL_JOINMSG(const std::string &clientNick, const std::string &clientUsername, const std::string &clientHostname, const std::string &channelName)
 {
 	return (":" + clientNick + "!" + clientUsername + "@" + clientHostname + " JOIN " + channelName + CRLF);
@@ -89,4 +90,12 @@ std::string RPL_JOINMSG(const std::string &clientNick, const std::string &client
 std::string RPL_PONG(const std::string token)
 {
 	return ("PONG " + token + CRLF);
+}
+
+// 333 -chanika- Marcus-> I dont think 333 exist.....
+std::string RPL_TOPICWHOTIME(const std::string &serverName, const std::string &clientNick, const std::string &channelName, const std::string &setter, time_t timestamp)
+{
+	std::ostringstream oss;
+	oss << timestamp;
+	return (":" + serverName + " 333 " + clientNick + " " + channelName + " " + setter + " " + oss.str() + CRLF);
 }

@@ -252,11 +252,9 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 	const std::string &cmd = cmd_lst.front();
 
 	if (cmd == "PASS")
-		// authenticate the user
-		handlePass(fd, cmd_lst);
+		handlePass(fd, cmd_lst);// authenticate the user
 	else if (cmd == "NICK")
-		// set the nickname
-		handleNick(fd, cmd_lst);
+		handleNick(fd, cmd_lst);// set the nickname
 	else if (cmd == "USER")
 		handleUser(fd, cmd_lst);
 	else if (cmd == "JOIN")
@@ -271,6 +269,12 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 		handlePart(fd, cmd_lst);
 	else if (cmd == "PRIVMSG")
 		handlePrivmsg(fd, cmd_lst);
+	else if (cmd == "KICK")
+		handleKick(fd, cmd_lst);
+	else if (cmd == "INVITE")
+		handleInvite(fd, cmd_lst);
+	else if (cmd == "TOPIC")
+		handleTopic(fd, cmd_lst);
 	else
 		sendError(fd, ERR_UNKNOWNCOMMAND(getName(), client->getNick(), cmd));
 }
