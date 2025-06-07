@@ -25,8 +25,11 @@ class Channel
 		bool						_inviteOnly;// -marcus-
 		std::vector<int>			_inviteList;// -marcus- 
 		bool						_topicRestricted;// -marcus-
-		size_t						_channellimitSize;// -marcus-
-		bool						_channelIslimited;// -marcus-
+		size_t						_channellimitSize;//chanika
+		bool						_channelIslimited;//chanika
+		std::string					_topicSetter;//chanika
+		time_t						_topicTime;//chanika
+
 
 	public:
 		Channel(const std::string &name, const std::string &password);
@@ -57,6 +60,20 @@ class Channel
 		void broadcast(const std::string &message);
 
 
+		// -chanika-
+			// channel operator commands
+			bool kickUser(Client *operator_client, Client *target_client, const std::string &reason);
+			//Topic-related methods 
+			void		setTopic(const std::string& topic);
+			void		setTopicSetter(const std::string& setter);
+			void		setTopicTime(time_t timestamp);
+			std::string getTopic() const;
+			std::string getTopicSetter() const;
+			time_t		getTopicTime() const;
+			std::string getTopicTimeString() const;
+		// -chanika-
+
+
 		//for mode -marcus-:
 			// INVITE (i)
 			void	SetInviteOnly(bool enable_invite);
@@ -82,6 +99,5 @@ class Channel
 			void	limitUnset(bool &print_success);
 			bool	IsChannelLimited() const;
 			size_t	getchannelLimit() const;
-			
 		//for mode -marcus-:
 };

@@ -214,6 +214,15 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			}
 			channel->addMember(client);
 
+			// IMPORTANT: Remove from invite list after successful join (if channel is invite-only)
+			if (channel->getchannelIsInviteOnly())
+            {
+                std::cout << YELLOW << "[DEBUG] Removing " << userNick << " (fd: " << fd 
+                          << ") from invite list after successful join" << RT << std::endl;
+                channel->removeInvite(fd);
+                std::cout << GREEN << "[DEBUG] Successfully removed from invite list" << RT << std::endl;
+            }
+
 			std::cout << "[JOIN] " << userNick << " joined " << channelName << "\n";
 			std::cout << "[USERS] " << channel->getClientList() << "\n";
 

@@ -74,7 +74,7 @@ class Server
 
 		// getter
 		const std::string &getName() const;
-		//const std::string &getCreatedTime() const;
+		const std::string &getCreatedTime() const;
 		Client* getClientByNick(const std::string &clientNick);
 
 		// add and remove clients
@@ -91,8 +91,12 @@ class Server
 		void		handleMode(int fd, std::list<std::string> cmd_lst);
 		void		handlePing(int fd, std::list<std::string> cmd_lst);
 
+		// channel operator commands
+        void        handleKick(int fd, std::list<std::string> cmd_list);
+		void		handleInvite(int fd, std::list<std::string> cmd_list);
+		void		handleTopic(int fd, std::list<std::string> cmd_list);
+		
 		void		sendWelcome(Client *client);
-
 		void		execute_cmd(int fd, std::list<std::string> cmd);
 		void		removeClient(int fd);
 		const 		std::vector<Client*>& getClients() const;
