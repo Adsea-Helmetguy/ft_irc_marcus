@@ -268,13 +268,15 @@ void Server::handleInvite(int fd, std::list<std::string> cmd_list)
          first = false;
      }
  
+     if (!newTopic.empty() && newTopic[0] == ':')
+        newTopic.erase(0, 1);
+    
      std::cout << CYAN << "[DEBUG] Attempting to set topic to: '" << newTopic << "'" << RT << std::endl;
  
      // Check if topic is restricted to operators only
      if (channel->getisTopicRestricted())
      {
          std::cout << YELLOW << "[DEBUG] Channel has topic restriction (+t mode)" << RT << std::endl;
-         
          if (!channel->isOperator(client))
          {
              std::cout << RED << "[ERROR] " << client->getNick() 
