@@ -299,22 +299,54 @@ void Server::handleClientConnection(int fd)
 
 		std::cout << "Received from client " << fd << ": " << command << std::endl;
 
+//
+//-marcus ->detect the EOF properly!
+		Client*			client = getClientByFd(fd);
+		std::string&	CommandBuffer = client->getCommandBuffer();	// ① (Get per-client buffer)
+		CommandBuffer.append(buffer);								// ② (Add new data to buffer)
+	
+		size_t newlinePos = 0;//stores the '\n' it finds in.
+		while ((newlinePos = CommandBuffer.find('\n')) != std::string::npos)// ③ (full command "\n")
+		{
+			// Extract the line from getCommandBuffer string
+			std::string line = CommandBuffer.substr(0, newlinePos);	// ④ (Extract full command "CommandBuffer")
+	
+			// Remove \r if it exists before \n
+			if (!line.empty() && line[line.length() - 1] == '\r')		// ⑤ (Remove \r)
+				line.erase(line.length() - 1);
+	
+			std::cout << "    Command token =" << line << std::endl;
+	
+			// Tokenize the line into command + arguments
+			std::list<std::string> cmd_lst = splitString(line);			// ⑥ (Split into tokens)
+	
+			if (!cmd_lst.empty())
+				execute_cmd(fd, cmd_lst);
+	
+			// Remove processed line from buffer
+			CommandBuffer.erase(0, newlinePos + 1);			// ⑦ (Remove processed line)
+		}
+//-marcus
+//
+
+		// -Ivan's old code-
 		// break the command from the user into individual str
 		// the client can send multiple lines to the user
 		// run a loop and break each line to execute it.
-		std::istringstream	iss(command);
-		std::string			line;
+// 		std::istringstream	iss(command);
+// 		std::string			line;
 
-		while (std::getline(iss, line))
-		{
-			if (!line.empty() && line[line.size() - 1] == '\r')
-				line.erase(line.size() - 1, 1);
-			//std::cout << line << std::endl;
-			std::list<std::string> cmd_lst = splitString(line);
-			// function to execute cmd
-			if (!cmd_lst.empty())
-				execute_cmd(fd, cmd_lst);
-		}
+		// while (std::getline(iss, line))
+		// {
+		// 	if (!line.empty() && line[line.size() - 1] == '\r')
+		// 		line.erase(line.size() - 1, 1);
+		// 	//std::cout << line << std::endl;
+		// 	std::list<std::string> cmd_lst = splitString(line);
+
+		// 	// function to execute cmd
+		// 	if (!cmd_lst.empty())
+		// 		execute_cmd(fd, cmd_lst);
+		// }
 	}
 }
 

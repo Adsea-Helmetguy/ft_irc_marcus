@@ -12,7 +12,7 @@ class Client
 		std::string _hostname;
 		bool		_authenticated;
 		bool		_registered;
-
+		std::string	_CommandBuffer;// -marcus-
 
 	public:
 		Client(int client_fd, std::string &client_ip);
@@ -32,4 +32,5 @@ class Client
 		void register_client();
 		bool is_authenticated();
 		bool is_registered();
+		std::string&	getCommandBuffer();// -marcus-
 };

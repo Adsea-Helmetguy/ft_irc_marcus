@@ -152,3 +152,4 @@ bool	isNumber(const std::string &str)
     }
     return (true);
 }
+

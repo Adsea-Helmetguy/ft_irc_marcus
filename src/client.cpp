@@ -87,3 +87,8 @@ bool Client::is_registered()
 {
 	return (_registered);
 }
+
+std::string&	Client::getCommandBuffer()// -marcus-
+{
+	return (this->_CommandBuffer);
+}
