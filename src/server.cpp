@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/19 10:54:53 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/16 11:51:10 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ void Server::runServer()
 			int fd = events[i].data.fd;
 			if (fd == _socket_fd)
 				handleIncomingNewClient();
-			else
+			else if (events[i].events & EPOLLIN)
 				handleClientConnection(fd);
 		}
 	}
