@@ -16,10 +16,19 @@ int main(int ac, char **av)
 {
 	if (ac == 3)
 	{
-		Server server(av[1], av[2]);
-		// main loop will wait for connections
-		setupSignalHandler();
-		server.runServer();
+		try
+		{
+			Server server(av[1], av[2]);
+			// main loop will wait for connections
+			setupSignalHandler();
+			server.runServer();
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << RED << "Server Function side failed: " 
+				<< e.what() << RT << std::endl;
+			return (-1);
+		}
 	}
 	else
 		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;

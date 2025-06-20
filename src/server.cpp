@@ -17,22 +17,11 @@ bool Server::_signal = false;
 Server::Server(const std::string &port, const std::string &password)
 {
 	if (port.empty() || password.empty())
-	{
-		std::cerr << RED << "Error: Arguments are empty!" << RT << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error("Arguments are Empty!");
 	if (!isValidPort(port.c_str()))
-	{
-		std::cerr << RED << "Error: Invalid port number. Must be between 1024 and 65535."
-			<< RT << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error("Invalid port number. Must be between 1024 and 65535.");
 	if (!isValidPassword(password))
-	{
-		std::cerr << RED << "Error: Password is invalid. Does it have spaces?"
-			<< RT << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error("Error: Password is invalid. Does it have spaces?");
 	_name = "ircserv";
 	_port = std::strtol(port.c_str(), NULL, 10);
 	_password = sha256(password);
@@ -93,17 +82,11 @@ void Server::serverInit()
 	// create the TCP socket
 	_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket_fd == -1)
-	{
-		std::cerr << "Error: Could not create socket" << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error("Error: Could not create socket");
 	// create the epoll fd
 	_epoll_fd = epoll_create1(0);
 	if (_epoll_fd == -1)
-	{
-		std::cerr << "Error: Could not create epoll instance\n";
-		exit(1);
-	}
+		throw std::runtime_error("Error: Could not create epoll instance\n");
 
 	// Add the server socket to epoll
 	struct epoll_event ev;
@@ -111,10 +94,7 @@ void Server::serverInit()
 	ev.data.fd = _socket_fd;
 
 	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _socket_fd, &ev) == -1)
-	{
-		std::cerr << "Error: Could not add server socket to epoll\n";
-		exit(1);
-	}
+		throw std::runtime_error("Error: Could not add server socket to epoll\n");
 
 	// configure the sockaddr
 	memset(&_serverAdd, 0, sizeof(_serverAdd));
@@ -127,25 +107,23 @@ void Server::serverInit()
 	timeout.tv_sec = 1;  // Set timeout to 1 second
 	timeout.tv_usec = 0;
 	if (setsockopt(_socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0)
-	{
-		std::cerr << "Error: Could not set timeout on accept()" << std::endl;
-	}
+		std::cerr << RED << "Error: Could not set timeout on accept()" << RT << std::endl;
 
 	// bind the socket to IP and port
 	if (bind(_socket_fd, (struct sockaddr *)&_serverAdd, sizeof(_serverAdd)) == -1)
 	{
-		std::cerr << "Error: Could not bind to port " << _port << std::endl;
+		std::cerr << RED << "Error: Could not bind to port " << _port << RT << std::endl;
 		close(_socket_fd);
-		exit(1);
+		throw std::runtime_error("Error: Could not bind to port!!");
 	}
 
 	// put the server in listening mode
 	// 5 is the backlog number, increase this if needed
 	if (listen(_socket_fd, 5) == -1)
 	{
-		std::cerr << "Error: Could not listen on port " << _port << std::endl;
+		std::cerr << RED << "Error: Could not listen on port " << _port << RT << std::endl;
 		close(_socket_fd);
-		exit(1);
+		throw std::runtime_error("Error: Could not listen on the port!!");
 	}
 	std::cout << "Server created on port: " << _port << " with password" << std::endl;
 	std::cout << "Server is listening on port " << _port << std::endl;
