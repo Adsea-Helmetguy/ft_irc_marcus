@@ -436,6 +436,13 @@ void	Server::modeTo_execute(char operation, char mode, Channel *targetChannel, C
 	}
 	if (mode == 'i' || mode == 't')
 		msg = ":" + client.getPrefix() + " MODE " + targetChannel->getName() + " " + operation + mode + "\r\n";
+	else if ((mode == 'k' || mode == 'l') && operation == '-')
+	{
+		if (mode == 'l')
+			msg = ":" + client.getPrefix() + " MODE " + targetChannel->getName() + " " + operation + mode + "\r\n";
+		else
+			msg = ":" + client.getPrefix() + " MODE " + targetChannel->getName() + " " + operation + mode + " *" + "\r\n";
+	}
 	else
 	{
 		if (stringPassed.empty())
