@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/20 12:36:21 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/20 13:10:37 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,12 @@ Server::Server(const std::string &port, const std::string &password)
 
 Server::~Server()
 {
+	for (size_t i = 0; i < _clients.size(); ++i)
+	{
+		close(_clients[i]->getFd());
+		delete _clients[i];
+	}
+	_clients.clear();
 	close(_socket_fd);
 	std::cout << "Server with port " << _port << " is shutting down." << std::endl;
 }
@@ -417,6 +423,7 @@ void	Server::closeClients()
 	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		close((*it)->getFd());
+		delete (*it);
 	}
 	_clients.clear();
 	std::cout << "ALL the remaining client Fds are closed." << std::endl;
