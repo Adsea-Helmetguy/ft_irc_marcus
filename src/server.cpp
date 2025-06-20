@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/16 11:51:10 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/20 12:36:21 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,6 +391,14 @@ void	Server::removeChannel(const std::string &channelName)
 // remove the client from the client list
 void	Server::removeClient(int fd)
 {
+	Client* client = getClientByFd(fd);
+    if (!client)
+		return;
+	
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++) 
+	{
+        it->removeUser(client); 
+    }
 	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if ((*it)->getFd() == fd)
