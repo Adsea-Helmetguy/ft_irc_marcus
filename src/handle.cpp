@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 10:19:08 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/23 15:48:34 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 16:26:12 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,12 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 	std::string serverName = this->getName();
 	std::string userNick = client->getNick();
 	if (channel && channel->checkNickNameUsed(userNick))
-		client->set_nick(userNick += "_");
+	{
+		std::string newNick = userNick;
+		while (channel->checkNickNameUsed(newNick))
+			newNick += "_";
+		client->set_nick(newNick);
+	}
 	std::string userName = client->getUserName();
 	std::string userHost = client->getHostName();
 	if (!channel)
