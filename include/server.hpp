@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:31:35 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/19 10:59:49 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 15:35:01 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,8 @@ class Server
 		
 		void		sendWelcome(Client *client);
 		void		execute_cmd(int fd, std::list<std::string> cmd);
+		Channel*	checkDuplicateNickinChannel(const std::string &nickname);
+
 		void		removeClient(int fd);
 		const 		std::vector<Client*>& getClients() const;
 		Client* 	getClientByFd(int fd);

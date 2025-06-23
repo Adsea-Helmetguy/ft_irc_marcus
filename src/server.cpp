@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 15:41:53 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/20 13:10:37 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 15:35:48 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,6 +325,18 @@ void	Server::removeChannel(const std::string &channelName)
 			return ;
 		}
 	}
+}
+
+Channel*	Server::checkDuplicateNickinChannel(const std::string &nickname)
+{
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (it->checkNickNameUsed(nickname))
+		{
+			return &(*it);
+		}
+	}
+	return (NULL);
 }
 
 void	Server::removeClient(int fd)
