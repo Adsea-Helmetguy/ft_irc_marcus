@@ -48,6 +48,7 @@ class Channel
 
 		bool isMember(Client *client);
 		void addMember(Client *client);
+		bool checkNickNameUsed(Client *client);
 
 		void addOperator(Client *client);
 
