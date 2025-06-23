@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 10:19:08 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/23 14:58:25 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 15:48:34 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,14 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	{
 		sendError(fd, "ERROR :Nickname too long\r\n");
 		return;
+	}
+	Channel *targetChannel = checkDuplicateNickinChannel(newNick);
+	if (targetChannel)
+	{
+		std::string out = ":" + client->getPrefix() + " PRIVMSG " + targetChannel->getName() + " :" + newNick + " This nickname is taken!" + CRLF;
+		std::cout << out << std::endl;
+		targetChannel->broadcast(out);
+		return ;
 	}
 	std::string oldNick = client->getNick();
 	client->set_nick(newNick);
@@ -125,7 +133,7 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 
 	std::string serverName = this->getName();
 	std::string userNick = client->getNick();
-	if (channel && channel->checkNickNameUsed(client))
+	if (channel && channel->checkNickNameUsed(userNick))
 		client->set_nick(userNick += "_");
 	std::string userName = client->getUserName();
 	std::string userHost = client->getHostName();

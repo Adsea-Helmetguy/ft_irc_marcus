@@ -48,7 +48,7 @@ class Channel
 
 		bool isMember(Client *client);
 		void addMember(Client *client);
-		bool checkNickNameUsed(Client *client);
+		bool checkNickNameUsed(const std::string &nickname);
 
 		void addOperator(Client *client);
 
