@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   operators.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cbandara <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/29 17:13:55 by cbandara          #+#    #+#             */
-/*   Updated: 2025/05/29 17:13:57 by cbandara         ###   ########.fr       */
+/*   Updated: 2025/06/23 14:28:14 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,10 +83,7 @@ void Server::handleKick(int fd, std::list<std::string> cmd_list)
          return;
      }
  
-     if (channel->kickUser(client, targetClient, reason))
-     {
-
-     }
+     channel->kickUser(client, targetClient, reason);
  }
 
 void Server::handleInvite(int fd, std::list<std::string> cmd_list)
