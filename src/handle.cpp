@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 10:19:08 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/06/23 14:04:11 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 14:23:38 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 		return ;
 	if (cmd_list.size() < 5)
 	{
-		const std::string &errorMsg = "ERROR :USER command requires three argument\r\n";
+		const std::string &errorMsg = "ERROR :USER command requires four argument. Eg: USER username 0 * 0 *\r\n";
 		sendError(fd, errorMsg);
 		return ;
 	}
