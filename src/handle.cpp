@@ -12,9 +12,6 @@
 
 #include "../include/server.hpp"
 
-/**
- * handles the client's password and checks if it matches with the server.
- */
 void Server::handlePass(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -25,7 +22,6 @@ void Server::handlePass(int fd, std::list<std::string> cmd_list)
 		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
 		return ;
 	}
-	// iterate to the second item in the list
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	const std::string &provided = *it;
@@ -39,7 +35,6 @@ void Server::handlePass(int fd, std::list<std::string> cmd_list)
 		send(fd, "ERROR :Invalid password\r\n", 26, 0);
 }
 
-// handle /NICK command, and checks if password has been provided first then assign nick
 void Server::handleNick(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -47,11 +42,9 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 		return ;
 	if (cmd_list.size() != 2)
 	{
-		// I need to change this
 		send(fd, "ERROR :PASS command requires exactly one argument\r\n", 50, 0);
 		return ;
 	}
-	// check if user has authenticated.
 	if (!client->is_authenticated())
 	{
 		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
@@ -59,11 +52,9 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\r\n";
 		return ;
 	}
-	// iterate to the second item in the list
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	std::string newNick = *it;
-	// check if the nickname has a max of 9 characters
 	if (newNick.length() > 9)
 	{
 		sendError(fd, "ERROR :Nickname too long\r\n");
@@ -77,9 +68,6 @@ void Server::handleNick(int fd, std::list<std::string> cmd_list)
 	sendReply(fd, nickReply);
 }
 
-/**
- * Sets the user's nick, username and hostname
- */
 void Server::handleUser(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -91,7 +79,6 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 		sendError(fd, errorMsg);
 		return ;
 	}
-	// check if user has authenticated.
 	if (!client->is_authenticated())
 	{
 		const std::string &errorMsg = "ERROR :You must authenticate with PASS first\r\n";
@@ -99,8 +86,6 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 		std::cout << "[WARN] Client " << fd << " tried to send NICK/USER before PASS\n";
 		return ;
 	}
-	// iterate to the second item in the list
-	// /USER username something hostname
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	std::string username = *it;
@@ -110,7 +95,6 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 
 	client->set_hostname(hostname);
 	std::cout << "[USER] : " << username << ", " << "[USER] : "<< hostname  << std::endl;
-	// check if all is set, return a message
 	if (!client->getNick().empty() && !client->getUserName().empty()
 		&& !client->getHostName().empty() && !client->is_registered())
 	{
@@ -119,11 +103,6 @@ void Server::handleUser(int fd, std::list<std::string> cmd_list)
 	}
 }
 
-
-/**
- * Helps user join a channel. If channel is not created on server, this creates the new channel.
- * For now we create channels that does not require passwords
- */
 void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -135,53 +114,41 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 		send(fd, "ERROR :JOIN command requires 1 or 2 arguments\r\n", 47, 0);
 		return ;
 	}
-	// extract the channel name
+
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	const std::string channelName = *it;
-	//check if there is a password provided by user
 	std::string password = "";
 	if (++it != cmd_list.end())
 		password = *it;
 	Channel *channel = getChannelByName(channelName);
 
-	// get all the variable to avoid calling again and again.
 	std::string serverName = this->getName();
 	std::string userNick = client->getNick();
 	std::string userName = client->getUserName();
 	std::string userHost = client->getHostName();
-	// if the channel does not exit, create the channel
 	if (!channel)
 	{
-		// create a new channel with the name given
 		_channels.push_back(Channel(channelName, password));
-		// get a reference to the channel created
 		channel = &_channels.back();
-		// add the client as operator
 		channel->addOperator(client);
-		// server displays message to show new channel is created
 		std::cout << "[INFO] New channel " << channelName
 				  << " created by " << client->getNick() << "\r\n";
 		if (!password.empty())
 			std::cout << channelName << " is a password protected channel" << "\r\n";
 		std::string clientList = channel->getClientList();
-		// send all the message together to irssi
 		sendReply(fd,
 		RPL_JOINMSG(userNick, userName, userHost, channelName) +
 		RPL_TOPIC(serverName, userNick, channelName, channel->getTopic()) +
 		RPL_CREATIONTIME(serverName, userNick, channelName, channel->getCreationTime()) +
 		RPL_NAMEREPLY(serverName, userNick, channelName, clientList) +
 		RPL_ENDOFNAMES(serverName, userNick, channelName));
-		// broadcast the join mesasge to all others except user
 		channel->broadcast(RPL_JOINMSG(userNick, userName, userHost, channelName), client);
 	}
 	else
 	{
-		// this channel already exist, add the client as member
-		// need to check if client is already a member
 		if (!channel->isMember(client))
 		{
-			// check if the person channel is invite only and if the person is in _invitelist
 			if (channel->getchannelIsInviteOnly() == true)
 			{
 				std::cout << RED << "[DEBUG] I am channel is invite only!" << RT << std::endl;
@@ -193,7 +160,6 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 					return ;
 				}
 			}
-			// check if the channel is full
 			if (channel->IsChannelLimited() == true)
 			{
 				if (channel->getUsersSize() >= channel->getchannelLimit())
@@ -205,7 +171,6 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 						channel->getUsersSize() << RED << " WHILE THE LIMITSIZE IS-> " << RT 
 						<< channel->getchannelLimit() << std::endl;
 			}
-			// check if there is password and if the password provided is the same
 			if (channel->hasPassword() && channel->getPassword() != password)
 			{
 				std::cout << "Error: " << userNick << " tried to join without a correct password" << std::endl;
@@ -214,7 +179,6 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			}
 			channel->addMember(client);
 
-			// IMPORTANT: Remove from invite list after successful join (if channel is invite-only)
 			if (channel->getchannelIsInviteOnly())
             {
                 std::cout << YELLOW << "[DEBUG] Removing " << userNick << " (fd: " << fd 
@@ -227,7 +191,6 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 			std::cout << "[USERS] " << channel->getClientList() << "\n";
 
 			std::string clientList = channel->getClientList();
-			// send all the message together to irssi
 			sendReply(fd,
 				RPL_JOINMSG(userNick, userName, userHost, channelName) +
 				RPL_TOPIC(serverName, userNick, channelName, channel->getTopic()) +
@@ -235,13 +198,11 @@ void Server::handleJoin(int fd, std::list<std::string> cmd_list)
 				RPL_NAMEREPLY(serverName, userNick, channelName, clientList) +
 				RPL_ENDOFNAMES(serverName, userNick, channelName));
 			std::cout << RPL_JOINMSG(userNick, userName, userHost, channelName) << std::endl;
-			// broadcast the join mesasge to all others except user
 			channel->broadcast(RPL_JOINMSG(userNick, userName, userHost, channelName), client);
 		}
 	}
 }
 
-//handles the "MODE" while in the channel
 void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 {
 	Client	*client = getClientByFd(fd);
@@ -257,7 +218,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	std::list<std::string>::iterator	it = cmd_lst.begin();
 	if (++it == cmd_lst.end())
 		return;
-	//checks that you wrote '#' as well as channel name to it:
 	std::string	hash_and_channelName;
 	hash_and_channelName.clear();
 	if (!(*it).empty())
@@ -265,7 +225,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	if (hash_and_channelName.empty() || hash_and_channelName[0] != '#')
 		return;
 
-	//find the channel
 	Channel	*targetChannel = NULL;
 	for (size_t i = 0; i < _channels.size(); ++i)
 	{
@@ -278,7 +237,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		}
 	}
 
-	//checking if channel exists
 	if (!targetChannel)
 	{
 		std::cout << GREEN << "[DEBUG] No such channel friend." << RT << std::endl;
@@ -286,7 +244,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 		return;
 	}
 
-	//Checking the membership and operator status
 	if (!targetChannel->isMember(client))
 	{
 		std::cout << GREEN << "[DEBUG] Member is not in channel." << RT << std::endl;
@@ -302,7 +259,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 
 	if (++it == cmd_lst.end())
 		return;
-	//checking the third argument requirements
 	std::string	modeCommand;
 	if (!(*it).empty())
 	{
@@ -311,7 +267,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	}
 	if (modeCommand.empty() || modeCommand.size() < 2)
 	{
-		//command for mode must be "+i" or "-i"
 		std::cout << RED << "[DEBUG] Your Command for mode is not enough or empty." << RT << std::endl;
 		return;
 	}
@@ -322,7 +277,6 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 	{
 		if (!modeCommand.empty() && (modeCommand[i] == '+' || modeCommand[i] == '-'))
 		{
-			//this is in case the first array, modeCommand[1] on onwards still has "+/-"
 			operation = modeCommand[i];
 			continue ;
 		}
@@ -346,7 +300,7 @@ void	Server::handleMode(int fd, std::list<std::string> cmd_lst)
 				if (++it != cmd_lst.end())
 					operator_addon(targetChannel, operation, it, *client);
 			}
-			else if (modeCommand[i] == 'l') ///mode #channel +l 10 -.Sets limit to 10
+			else if (modeCommand[i] == 'l')
 				user_limit(targetChannel, operation, it, cmd_lst, *client);
 		}
 	}
@@ -367,21 +321,19 @@ void	Server::handlePing(int fd, std::list<std::string> cmd_lst)
 	std::cout << "[PING] Replied with: " << RPL_PONG(token);
 }
 
-// handle /PART which allows the user to exit the channel
 void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
 	if (!client)
 		return ;
-	// if there are only one param, throw error
+
 	if (cmd_list.size() == 1)
 	{
 		sendError(fd, ERR_NEEDMOREPARAMS(getName(), client->getNick(), cmd_list.front()));
 		std::cout << "[PART] Not enough parameters" << std::endl;
 		return ;
 	}
-	// check if channel exit
-	// extract the channel name
+
 	std::list<std::string>::const_iterator it = cmd_list.begin();
 	++it;
 	const std::string channelName = *it;
@@ -401,7 +353,6 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 	}
 	std::cout << "Reason" << std::endl;
 	std::cout << reason << std::endl;
-	// iterate over _channels to search if the channel already exist
 	Channel *channel = getChannelByName(channelName);
 
 	if (!channel)
@@ -417,7 +368,6 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 		return;
 	}
 
-	// may need include the parting message
 	std::string partMsg = ":" + client->getPrefix() + " PART " + channelName;
 	if (!reason.empty())
 		partMsg += " " + reason;
@@ -428,11 +378,8 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 	std::cout << "DEBUG PART MSG: [" << partMsg << "]" << std::endl;
 	sendReply(client->getFd(), partMsg);
 	channel->broadcast(partMsg, client);
-	// remove the member/operator from the channel;
 	channel->removeUser(client);
 
-	// after the user has been removed, broad the message to other users
-	// if there is no more users in the channel, remove it from the channel vector in the server
 	if (channel->getUsers().empty())
 	{
 		removeChannel(channel->getName());
@@ -442,7 +389,6 @@ void	Server::handlePart(int fd, std::list<std::string> cmd_list)
 		sendError(fd, ERR_NOTONCHANNEL(getName(), client->getNick(), channelName));
 }
 
-// handle /PRIVMSG command, send message to channel or send to specific user
 void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 {
 	Client *client = getClientByFd(fd);
@@ -451,7 +397,6 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 		std::cout << "[PRIVMSG] No client found for fd: " << fd << std::endl;
 		return ;
 	}
-	// if there are only one param, throw error
 	if (cmd_list.size() < 3)
 	{
 		sendError(fd, ERR_NEEDMOREPARAMS(getName(), client->getNick(), cmd_list.front()));
@@ -462,7 +407,6 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 	++it;
 	std::string target = *it++;
 	std::string message;
-	// add all the strings into message
 	while (it != cmd_list.end())
 	{
 		if (!message.empty())
@@ -491,7 +435,6 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 	}
 	else
 	{
-		// find the target in the server _clients
 		Client* targetUser = getClientByNick(target);
 		if (!targetUser)
 		{
@@ -500,7 +443,6 @@ void	Server::handlePrivmsg(int fd, std::list<std::string> cmd_list)
 		}
 		std::string out = ":" + client->getPrefix() + " PRIVMSG " + target + " :" + message + CRLF;
 		std::cout << out << std::endl;
-		// send the message to the target user
 		sendReply(targetUser->getFd(), out);
 	}
 }

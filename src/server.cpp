@@ -27,7 +27,6 @@ Server::Server(const std::string &port, const std::string &password)
 	_password = sha256(password);
 	_created_time = getFormattedTime();
 
-	// setup the TCP socket
 	this->serverInit();
 }
 
@@ -79,37 +78,31 @@ void Server::serverInit()
 {
 	_signal = false;
 
-	// create the TCP socket
 	_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket_fd == -1)
 		throw std::runtime_error("Error: Could not create socket");
-	// create the epoll fd
 	_epoll_fd = epoll_create1(0);
 	if (_epoll_fd == -1)
 		throw std::runtime_error("Error: Could not create epoll instance\n");
 
-	// Add the server socket to epoll
 	struct epoll_event ev;
-	ev.events = EPOLLIN;  // Listening for incoming connections
+	ev.events = EPOLLIN;
 	ev.data.fd = _socket_fd;
 
 	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _socket_fd, &ev) == -1)
 		throw std::runtime_error("Error: Could not add server socket to epoll\n");
 
-	// configure the sockaddr
 	memset(&_serverAdd, 0, sizeof(_serverAdd));
 	_serverAdd.sin_family = AF_INET;
 	_serverAdd.sin_port = htons(_port);
 	_serverAdd.sin_addr.s_addr = INADDR_ANY;
 
-	// sets a timeout of the socket
 	struct timeval timeout;
-	timeout.tv_sec = 1;  // Set timeout to 1 second
+	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	if (setsockopt(_socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0)
 		std::cerr << RED << "Error: Could not set timeout on accept()" << RT << std::endl;
 
-	// bind the socket to IP and port
 	if (bind(_socket_fd, (struct sockaddr *)&_serverAdd, sizeof(_serverAdd)) == -1)
 	{
 		std::cerr << RED << "Error: Could not bind to port " << _port << RT << std::endl;
@@ -117,8 +110,6 @@ void Server::serverInit()
 		throw std::runtime_error("Error: Could not bind to port!!");
 	}
 
-	// put the server in listening mode
-	// 5 is the backlog number, increase this if needed
 	if (listen(_socket_fd, 5) == -1)
 	{
 		std::cerr << RED << "Error: Could not listen on port " << _port << RT << std::endl;
@@ -172,7 +163,6 @@ void Server::signalHandler(int signum)
 
 void	Server::handleIncomingNewClient()
 {
-	// creates the client fd
 	struct sockaddr_in clientAddr;
 	socklen_t clientLen = sizeof(clientAddr);
 	int client_fd = accept(_socket_fd, (struct sockaddr *)&clientAddr, &clientLen);
@@ -183,25 +173,20 @@ void	Server::handleIncomingNewClient()
 		return ;
 	}
 
-	// get the client ip
 	std::string client_ip = inet_ntoa(clientAddr.sin_addr);
 	std::cout << "Client connected from: " << client_ip << ":"
 		<< ntohs(clientAddr.sin_port) << std::endl;
 
-	// set the client fd to non blocking
 	if (setnonblocking(client_fd) == -1)
 	{
 		close(client_fd);
 		return ;
 	}
 
-	// Create and store the new client
 	Client* newClient = new Client(client_fd, client_ip);
 
-	// this adds the client into the clients list
 	_clients.push_back(newClient);
 
-	// this adds the client fd into epoll
 	struct epoll_event clientEvent;
 	clientEvent.events = EPOLLIN;
 	clientEvent.data.fd = client_fd;
@@ -236,9 +221,9 @@ void	Server::execute_cmd(int fd, std::list<std::string> cmd_lst)
 	const std::string &cmd = cmd_lst.front();
 
 	if (cmd == "PASS")
-		handlePass(fd, cmd_lst);// authenticate the user
+		handlePass(fd, cmd_lst);
 	else if (cmd == "NICK")
-		handleNick(fd, cmd_lst);// set the nickname
+		handleNick(fd, cmd_lst);
 	else if (cmd == "USER")
 		handleUser(fd, cmd_lst);
 	else if (cmd == "JOIN")
@@ -269,7 +254,6 @@ void Server::handleClientConnection(int fd)
 	char buffer[513];
 	ssize_t bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
 
-	// if the client quits, recv will receive 0 when closed or -1 when there is error
 	if (bytesRead <= 0)
 	{
 		std::cout << "Client " << fd << " disconnected.\n";
@@ -283,54 +267,26 @@ void Server::handleClientConnection(int fd)
 
 		std::cout << "Received from client " << fd << ": " << command << std::endl;
 
-//
-//-marcus ->detect the EOF properly!
 		Client*			client = getClientByFd(fd);
-		std::string&	CommandBuffer = client->getCommandBuffer();	// ① (Get per-client buffer)
-		CommandBuffer.append(buffer);								// ② (Add new data to buffer)
+		std::string&	CommandBuffer = client->getCommandBuffer();
+		CommandBuffer.append(buffer);
 	
-		size_t newlinePos = 0;//stores the '\n' it finds in.
-		while ((newlinePos = CommandBuffer.find('\n')) != std::string::npos)// ③ (full command "\n")
+		size_t newlinePos = 0;
+		while ((newlinePos = CommandBuffer.find('\n')) != std::string::npos)
 		{
-			// Extract the line from getCommandBuffer string
-			std::string line = CommandBuffer.substr(0, newlinePos);	// ④ (Extract full command "CommandBuffer")
-	
-			// Remove \r if it exists before \n
-			if (!line.empty() && line[line.length() - 1] == '\r')		// ⑤ (Remove \r)
+			std::string line = CommandBuffer.substr(0, newlinePos);
+
+			if (!line.empty() && line[line.length() - 1] == '\r')
 				line.erase(line.length() - 1);
 	
 			std::cout << "    Command token =" << line << std::endl;
 	
-			// Tokenize the line into command + arguments
-			std::list<std::string> cmd_lst = splitString(line);			// ⑥ (Split into tokens)
+			std::list<std::string> cmd_lst = splitString(line);
 	
 			if (!cmd_lst.empty())
 				execute_cmd(fd, cmd_lst);
-	
-			// Remove processed line from buffer
-			CommandBuffer.erase(0, newlinePos + 1);			// ⑦ (Remove processed line)
+			CommandBuffer.erase(0, newlinePos + 1);
 		}
-//-marcus
-//
-
-		// -Ivan's old code-
-		// break the command from the user into individual str
-		// the client can send multiple lines to the user
-		// run a loop and break each line to execute it.
-// 		std::istringstream	iss(command);
-// 		std::string			line;
-
-		// while (std::getline(iss, line))
-		// {
-		// 	if (!line.empty() && line[line.size() - 1] == '\r')
-		// 		line.erase(line.size() - 1, 1);
-		// 	//std::cout << line << std::endl;
-		// 	std::list<std::string> cmd_lst = splitString(line);
-
-		// 	// function to execute cmd
-		// 	if (!cmd_lst.empty())
-		// 		execute_cmd(fd, cmd_lst);
-		// }
 	}
 }
 
@@ -371,8 +327,6 @@ void	Server::removeChannel(const std::string &channelName)
 	}
 }
 
-
-// remove the client from the client list
 void	Server::removeClient(int fd)
 {
 	Client* client = getClientByFd(fd);
@@ -412,9 +366,6 @@ const std::vector<Client*>& Server::getClients() const
 	return (_clients);
 }
 
-//|--------------------------------------|
-//|        -MARCUS FUNCTIONS-            |
-//|--------------------------------------|
 void	Server::modeTo_execute(char operation, char mode, Channel *targetChannel, Client &client, std::string stringPassed)
 {
 	std::stringstream logMsg;
@@ -446,11 +397,10 @@ void	Server::modeTo_execute(char operation, char mode, Channel *targetChannel, C
 	targetChannel->broadcast(msg);
 }
 
-//sets channel to invite only
 void	Server::invite_only(Channel *targetChannel, char operation, Client &client)
 {
 	if (operation == '+')
-		targetChannel->SetInviteOnly(true);//set the channel as invite only
+		targetChannel->SetInviteOnly(true);
 	else if (operation == '-')
 		targetChannel->SetInviteOnly(false);
 	if (targetChannel->getchannelIsInviteOnly() == true)
@@ -495,7 +445,6 @@ void	Server::channel_password(Channel *targetChannel, char operation, std::list<
 	}
 }
 
-//add the client's fd to the operatorlist
 void	Server::operator_addon(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, Client &client)
 {
 	bool	print_success = false;
@@ -513,7 +462,6 @@ void	Server::operator_addon(Channel *targetChannel, char operation, std::list<st
 	}
 }
 
-//broadcast message?
 void	Server::user_limit(Channel *targetChannel, char operation, std::list<std::string>::iterator &it, std::list<std::string> &cmd_lst, Client &client)
 {
 	bool	print_success = false;
@@ -527,4 +475,3 @@ void	Server::user_limit(Channel *targetChannel, char operation, std::list<std::s
 	if (print_success == true)
 		modeTo_execute(operation, 'l', targetChannel, client, *it);
 }
-//Marcus functions
