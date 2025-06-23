@@ -33,7 +33,6 @@ bool	isValidPort(const char *portStr)
 
 bool	isValidPassword(const std::string password)
 {
-	//IF Password is printable ASCII
 	for (size_t i = 0; i < password.size(); i++)
 	{
 		if (password[i] < 33 || password[i] > 126)
@@ -49,46 +48,15 @@ std::list<std::string> splitString(std::string &cmd)
 	std::string token;
 	std::string name;
 
-	//while (stm >> token)
 	for (int loop = 1; stm >> token; loop++)
 	{
 		std::cout << YELLOW << "LOOP-> " << loop
 			<< " | Token = " << RT << token << std::endl;
-		//if (loop >= 5)
-		//{
-		//	name += token + " ";
-		//	continue;
-		//}
-		lst.push_back(token);
-		token.clear();
-	}
-/*
-	if (!name.empty() && name[name.size() - 1] == ' ')
-	{
-		name.erase((name.size() - 1), 1);
-		std::cout << "The localhost name = \"" << YELLOW
-			<< name << RT << "\"" << std::endl;
-		lst.push_back(name);
-	}
-*/
-	return (lst);
-}
-
-/*
-std::list<std::string> splitString(std::string &cmd)
-{
-	std::list<std::string> lst;
-	std::istringstream stm(cmd);
-	std::string token;
-
-	while (stm >> token)
-	{
 		lst.push_back(token);
 		token.clear();
 	}
 	return (lst);
 }
-*/
 
 void	sendError(int fd, const std::string &message)
 {
@@ -112,20 +80,15 @@ std::string getFormattedTime()
 	char buffer[80];
 
 	std::time(&rawTime);
-	timeInfo = std::gmtime(&rawTime); // Convert to UTC
+	timeInfo = std::gmtime(&rawTime);
 
-	// Format: "Wed Jul 17 2024 at 21:46:54 UTC"
 	std::strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S UTC", timeInfo);
 	return std::string(buffer);
 }
 
 int	setnonblocking(int client_fd)
 {
-	int flags = fcntl(client_fd, F_GETFL, 0);
-	if (flags == -1)
-		return (-1);
-
-	return (fcntl(client_fd, F_SETFL, flags | O_NONBLOCK));
+	return (fcntl(client_fd, F_SETFL, O_NONBLOCK));
 }
 
 std::string sha256(const std::string &str)

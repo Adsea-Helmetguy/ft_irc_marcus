@@ -19,7 +19,6 @@ int main(int ac, char **av)
 		try
 		{
 			Server server(av[1], av[2]);
-			// main loop will wait for connections
 			setupSignalHandler();
 			server.runServer();
 		}

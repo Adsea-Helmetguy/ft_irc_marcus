@@ -12,13 +12,12 @@ class Client
 		std::string _hostname;
 		bool		_authenticated;
 		bool		_registered;
-		std::string	_CommandBuffer;// -marcus-
+		std::string	_CommandBuffer;
 
 	public:
 		Client(int client_fd, std::string &client_ip);
 		~Client() {};
 		const int &getFd() const;
-		//const Client* &getClientByNick(const std::string clientNick);
 		const std::string &getNick() const;
 		const std::string &getUserName() const;
 		const std::string &getHostName() const;
@@ -32,5 +31,5 @@ class Client
 		void register_client();
 		bool is_authenticated();
 		bool is_registered();
-		std::string&	getCommandBuffer();// -marcus-
+		std::string&	getCommandBuffer();
 };

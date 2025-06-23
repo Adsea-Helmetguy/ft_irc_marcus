@@ -16,9 +16,6 @@
 
 #define CRLF "\r\n"
 
-//#define RPL_NAMEREPLY(serverName, clientNick, channelName, clientList) (":" + serverName + " 353 " + clientNick + " " + channelName + " :" + clientList + CRLF)
-//#define RPL_ENDOFNAMES(serverName, channelName) (":" + serverName + " 366 " + clientNick + " " + channelName + " :End of /NAMES" + CRFL)
-
 // 001
 std::string RPL_WELCOME(const std::string &serverName, const std::string &clientNick);
 // 002

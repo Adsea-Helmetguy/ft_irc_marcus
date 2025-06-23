@@ -20,8 +20,6 @@ Channel::Channel(const std::string &name, const std::string &password)
 	_created_time = getFormattedTime();
 	_inviteOnly = false;
 	_topicRestricted = false;
-	//for l
-	//chanika
     _topicSetter = "";
     _topicTime = 0;
     _channellimitSize = 0;
@@ -61,8 +59,6 @@ std::string Channel::getClientList()
 		else
 			clientList += _users[i].client->getNick();
 	}
-	//std::cout << "Printing client list" << std::endl;
-	//std::cout << clientList << std::endl;
 	return (clientList);
 }
 
@@ -125,12 +121,8 @@ void Channel::removeUser(Client *client)
 	}
 }
 
-/**
- * Sends a message to all members of a channel except the user specified
- */
 void Channel::broadcast(const std::string &message, const Client *exclude)
 {
-	// loop through the _users vector to send the message
 	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
 		if (it->client != exclude)
@@ -141,9 +133,6 @@ void Channel::broadcast(const std::string &message, const Client *exclude)
 	}
 }
 
-/**
- * Sends the message to everybody.
- */
 void Channel::broadcast(const std::string &message)
 {
 	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
@@ -152,7 +141,6 @@ void Channel::broadcast(const std::string &message)
 	}
 }
 
-// -chanika-
 void Channel::setTopic(const std::string& topic)
 {
     this->_topic = topic;
@@ -193,21 +181,15 @@ std::string Channel::getTopicTimeString() const
 
 bool Channel::kickUser(Client *operator_client, Client *target_client, const std::string &reason)
 {
-	// Check if operator has permission to kick
 	if (!isOperator(operator_client))
 		return false;
 	
-	// Check if the target is in the channel
 	if (!isMember(target_client))
 		return false;
-	
-	// Notify all channel members about the kick
 	std::string kickMessage = ":" + operator_client->getPrefix() + " KICK " + _name + " " + 
 		target_client->getNick() + " :" + reason + "\r\n";
 	
 	broadcast(kickMessage);
-	
-	// Remove the user from the channel
 	removeUser(target_client);
 	
 	return true;
