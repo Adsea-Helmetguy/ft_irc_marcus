@@ -6,7 +6,7 @@
 /*   By: gyong-si <gyong-si@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:21:05 by gyong-si          #+#    #+#             */
-/*   Updated: 2025/05/19 10:51:20 by gyong-si         ###   ########.fr       */
+/*   Updated: 2025/06/23 14:48:07 by gyong-si         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,15 @@ void Channel::addMember(Client *client)
 	_users.push_back(ChannelUser(client, false));
 }
 
+bool Channel::checkNickNameUsed(Client *client)
+{
+	for (std::vector<ChannelUser>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (it->client->getNick() == client->getNick())
+			return (true);
+	}
+	return (false);
+}
 
 bool Channel::hasPassword() const
 {
