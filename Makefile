@@ -29,10 +29,13 @@ OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 # Dependency files
 DEPS = $(OBJS:.o=.d)
 
-all: $(OBJ_DIR) $(TARGET)
+all: $(OBJ_DIR) irssi_dir $(TARGET)
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
+
+irssi_dir:
+	@if [ ! -d "$(HOME)/.irssi" ]; then mkdir "$(HOME)/.irssi"; fi
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
@@ -52,4 +55,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re irssi_dir

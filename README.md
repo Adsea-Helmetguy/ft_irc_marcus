@@ -92,3 +92,54 @@ Handle Channel Management
 
 - [ ] Check for memory leaks.
 - [ ] Ensure proper cleanup of resources.
+
+
+
+
+
+## Marcus Notes:
+### Start your server:
+./ircserv 6668 mypassword
+
+### Start irssi with startup flags, not just /connect:
+irssi -c localhost -p 6667 -w mypassword -n alice -h alice
+/quote CAP END
+/quote PASS mypassword
+/quote NICK alice
+/quote USER alice 0 * :Alice Doe
+
+irssi -c localhost -p 6667 -w mypassword -n bob -h bob
+/quote CAP END
+/quote PASS mypassword
+/quote NICK bob
+/quote USER bob 0 * :bobby bob
+
+### 3. JOIN
+/join #test
+
+### 4. PRIVMSG
+/msg #test hello everyone
+
+### 5. MSG (From alice side)
+/msg bob hey bob
+/query bob
+/msg bob private hello bob
+### 5.1 (From bob side)
+/msg alice hey alice
+/query alice
+/msg alice private hello alice
+### 5.2 (To leave query)
+/window close
+/window list
+/window <number>
+
+A quicker way is often:
+    - Alt+<number> to jump to a window
+    - Ctrl+N / Ctrl+P to move between windows
+
+
+### 6. PART
+/part #test leaving now
+
+### To leave:
+/exit
